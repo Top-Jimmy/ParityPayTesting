@@ -159,16 +159,18 @@ class PubHeader(Component):
 	def click_for_employers(self):
 		if self.for_employers != None:
 			self.for_employers.click()
-			#time.sleep(1)
 			WDW(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'demo_email')))
 
 	def click_for_employees(self):
-		if self.for_employees != None:
-			self.for_employees.click()
-			WDW(self.driver,10).until(EC.presence_of_element_located((By.ID, 'contactEmail2')))
+		if main.is_desktop():
+			if self.for_employees != None:
+				self.for_employees.click()
+				WDW(self.driver,10).until(EC.presence_of_element_located((By.ID, 'contactEmail2')))
+		else:
+			self.select_action('employees')
 
 	def select_action(self, text):
-		# action_text = 'emp' (employers or employees), 'sign in', or 'signed in'
+		# text: 'emp' (employers or employees), 'sign in', or 'signed in'
 		AC(self.driver).move_to_element(self.action_menu).perform()
 		if self.action_menu != None:
 			if not self.action_menu_open():
@@ -195,8 +197,6 @@ class PubHeader(Component):
 		find_by = self.driver.find_element_by_class_name
 		if (self.action_menu != None and
 			find_by('navbar-collapse').is_displayed()):
-			# (self.action_employers is not None and self.action_employers.is_displayed()
-			# or self.action_employees.is_displayed())):
 			return True
 		return False
 
@@ -280,24 +280,15 @@ class PrivateHeader():
 		if self.menu_type() == 'back':
 			self.back_button = self.driver.find_element_by_id('navback_button')
 		elif main.get_env() != 'desktop':
-			# self.hamburger = self.cont.find_elements_by_tag_name('button')[0]
 			self.hamburger = self.cont.find_element_by_class_name('hamburger')
 
-		# self.language_dd = self.cont.find_element_by_id('locale_dropdown')
 		self.feedback = self.cont.find_element_by_id('feedback_dropdown')
 		try:
 			self.english = self.driver.find_element_by_id('locale_en')
 			self.spanish = self.driver.find_element_by_id('locale_es')
-			#print('loaded language selector')
 		except NoSuchElementException:
 			self.english = None
 			self.spanish = None
-
-		# page title (check on recipient command center)
-		# self.title = self.cont.find_element_by_tag_name('h2').text
-		# #print('loaded title')
-		# if self.page_title != None and self.page_title != self.title:
-		# 	self.fail = self.driver.find_element_by_id('fail')
 
 	def menu_type(self):
 		# 'hamburger' on desktop doesn't actually have hamburger icon
@@ -306,24 +297,6 @@ class PrivateHeader():
 			return 'back'
 		except NoSuchElementException:
 			return 'hamburger'
-
-	# def select_language(self,language):
-	#     self.open_language_dropdown()
-	#     if language.lower() == 'english':
-	#         self.driver.find_element_by_id('locale_en').click()
-	#     elif language.lower() == 'spanish':
-	#         self.driver.find_element_by_id('locale_es').click()
-	#     else:
-	#         # function only accepts english or spanish
-	#         fail = "1" + 2
-	#     self.load()
-
-	# def open_language_dropdown(self):
-	#     if self.english is None:
-	#         AC(self.driver).move_to_element(self.language_dd).perform()
-	#         self.language_dd.click()
-	#         time.sleep(.6)
-	#         self.load()
 
 	def give_feedback(self, happiness, messsage):
 		self.scroll_to_top()

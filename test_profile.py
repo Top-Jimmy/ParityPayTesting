@@ -5,7 +5,7 @@ import profiles
 import browser
 import main
 import messages
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
@@ -29,7 +29,6 @@ class TestElection(unittest.TestCase):
 		self.cheeks = profiles.Profile(self.driver,'cheeks')
 		self.lili = profiles.Profile(self.driver, 'lili')
 		self.nicol = profiles.Profile(self.driver, 'nicol')
-		self.WDWait = WebDriverWait(self.driver, 10)
 
 	def tearDown(self):
 		self.driver.quit()
@@ -63,7 +62,7 @@ class TestElection(unittest.TestCase):
 		eHome.set_election(business1, new_election1)
 
 		# save button should be enabled and blue after changes are made
-		self.WDWait.until(EC.element_to_be_clickable((By.ID, 'save_election_button')))
+		WDW(self.driver, 10).until(EC.element_to_be_clickable((By.ID, 'save_election_button')))
 		self.assertTrue(eHome.is_enabled(eHome.save_button))
 		background = eHome.save_button.value_of_css_property('background')
 		enabled_color = 'rgb(105, 214, 241)'
@@ -274,11 +273,6 @@ class TestElection(unittest.TestCase):
 
 		self.assertTrue(pe_page.on())
 		pe_page.mark_all_as_processed()
-		# if main.is_desktop():
-		#   pe_page.go_to_tab()
-		#   self.assertTrue(lobby_page.on())    #fails if no elections pending.
-		#   lobby_page.menu.sign_out()
-		# else:
 		pe_page.menu.sign_out()
 
 		self.assertTrue(self.lili.login(self.driver), messages.login)
@@ -330,7 +324,6 @@ class TestPS(unittest.TestCase):
 		self.driver = browser.start(main.get_env(),main.get_browser())
 		self.cheeks = profiles.Profile(self.driver,'cheeks')
 		self.alone6 = profiles.Profile(self.driver, 'alone6')
-		# self.WDWait = WebDriverWait(self.driver, 10)
 
 	def tearDown(self):
 		self.driver.quit()
@@ -401,10 +394,10 @@ class TestPS(unittest.TestCase):
 		# remove phone# if there from last test
 		new_phone = "(202) 554-2345"
 		if ps_page.has_phone(new_phone):
-				ps_page.edit_phone(new_phone)
-				self.assertTrue(edit_phone_page.on())
-				edit_phone_page.remove_phone()
-				self.assertTrue(ps_page.on())
+			WDW(self.driver, 10).until(lambda x: ps_page.edit_phone(new_phone))
+			self.assertTrue(edit_phone_page.on())
+			edit_phone_page.remove_phone()
+			self.assertTrue(ps_page.on())
 
 		self.assertEqual(1,len(ps_page.edit_phone_buttons))
 		ps_page.add_phone()
@@ -418,7 +411,7 @@ class TestPS(unittest.TestCase):
 
 		self.assertTrue(ps_page.on())
 		self.assertEqual(2,len(ps_page.edit_phone_buttons))
-		ps_page.edit_phone(new_phone)
+		WDW(self.driver, 10).until(lambda x: ps_page.edit_phone(new_phone))
 
 		self.assertTrue(edit_phone_page.on())
 		edit_phone_page.remove_phone()
@@ -610,7 +603,7 @@ class TestPS(unittest.TestCase):
 
 		self.assertTrue(ps_page.on())
 		self.assertEqual(1,len(ps_page.edit_phone_buttons))
-		ps_page.edit_phone(0)
+		WDW(self.driver, 10).until(lambda x: ps_page.edit_phone(0))
 
 		self.assertTrue(edit_phone_page.on())
 		self.assertEqual(None, edit_phone_page.remove_phone_button)
@@ -632,7 +625,7 @@ class TestPS(unittest.TestCase):
 		self.assertTrue(ps_page.on())
 		num_phones = len(ps_page.edit_phone_buttons)
 		self.assertEqual(1, num_phones)
-		ps_page.edit_phone(new_phone)
+		WDW(self.driver, 10).until(lambda x: ps_page.edit_phone(new_phone))
 
 		self.assertTrue(edit_phone_page.on())
 		edit_phone_page.set_phone(original_phone)
@@ -642,6 +635,6 @@ class TestPS(unittest.TestCase):
 		confirmation_page.enter_code()
 
 		self.assertTrue(ps_page.on())
-		self.assertTrue(
-			ps_page.edit_phone_buttons[0].text == original_phone)
+		self.assertEqual(1, len(ps_page.edit_phone_buttons))
+		self.assertTrue(ps_page.has_phone(original_phone))
 

@@ -437,32 +437,22 @@ class TestEdit(unittest.TestCase):
 
 		new_carrier = 'nextel'
 		new_phone = '202' + self.cheeks.generate_number(7)
-		# name, year, month, day
-		new_rfc = (
-			self.cheeks.generate_string(4, 'upper') +
-			self.cheeks.generate_number(2) + '0' +
-			self.cheeks.generate_number(1, lower_bound=1) + '0' +
-			self.cheeks.generate_number(1, lower_bound=1)
-		)
-		new_pin = self.cheeks.generate_number(4)
+		new_dob = self.cheeks.generate_rfc_dob()
+
+		# Test Code
+		info_page.addInfo.set_dob(new_dob)
+		# End Test Code
+
 		if initial_info['carrier'] == 'nextel':
 			new_carrier = 'unefon'
 		while new_phone == initial_info['phone']:
 			new_phone = '202' + self.cheeks.generate_number(7)
-		while new_rfc == initial_info['rfc']:
-			new_rfc = (
-				self.cheeks.generate_string(4, 'upper') +
-				self.cheeks.generate_number(2) + '0' +
-				self.cheeks.generate_number(1) + '0' +
-				self.cheeks.generate_number(1)
-			)
-		while new_pin == initial_info['pin']:
-			new_pin = self.cheeks.generate_number(4)
+			while new_dob != initial_info['dob']:
+				new_dob = self.cheeks.generate_rfc_dob()
 		new_info = {
 			'carrier': new_carrier,
 			'phone': new_phone,
-			'rfc': new_rfc,
-			'pin': new_pin
+			'dob': new_dob,
 		}
 		print(new_info)
 		info_page.addInfo.set_info(new_info)
@@ -476,7 +466,7 @@ class TestEdit(unittest.TestCase):
 		self.assertEqual(new_info['carrier'], updated_info['carrier'])
 		self.assertEqual(new_info['phone'], updated_info['phone'])
 		self.assertEqual(new_info['rfc'], updated_info['rfc'])
-		self.assertEqual(new_info['pin'], updated_info['pin'])
+		# self.assertEqual(new_info['pin'], updated_info['pin'])
 
 		# Check RFC validation
 		bad_rfc = [
@@ -1021,9 +1011,9 @@ class TestRecipients(unittest.TestCase):
 
 		# create US based recipient
 		self.assertTrue(eHome.on())
-		eHome.send_money()
+		eHome.menu.click_option('recipients')
 		self.assertTrue(recip_page.on())
-		recip_page.click_add()
+		recip_page.add_recipient()
 		self.assertTrue(name_page.on())
 		name_page.set_location('us')
 		self.assertEqual('United States', name_page.get_location())
@@ -1031,8 +1021,13 @@ class TestRecipients(unittest.TestCase):
 		name = self.cheeks.generate_name()
 		name_page.enter_name(name)
 
+		self.assertTrue(recip_page.on())
+		recip_page.click_recipient(name)
+		self.assertTrue(view_page.on())
+		view_page.add_destination()
+
 		self.assertTrue(ba_page.on())
-		ba_page.set_destination_type('bank')
+		# ba_page.set_destination_type('bank')
 		self.assertEqual('United States', ba_page.get_location())
 
 		routing_num = "124000054"
@@ -1044,12 +1039,6 @@ class TestRecipients(unittest.TestCase):
 		self.assertEqual('savings', ba_page.get_account_type())
 		ba_page.click_continue()
 
-		self.assertTrue(send_page.on())
-		send_page.header.click_back()
-
-		self.assertTrue(recip_page.on())
-		identifier = " ".join(name)
-		recip_page.edit_recipient(identifier)
 		self.assertTrue(view_page.on())
 		view_page.edit_name()
 

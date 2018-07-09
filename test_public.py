@@ -35,7 +35,7 @@ class TestContactFlow(unittest.TestCase):
 		self.driver.quit()
 
   def test_invalid_inputs(self):
-		"""public : Contact Flow .                             invalid inputs"""
+		"""public : Contact Flow .                             invalid_inputs"""
 		# assert "Contact Flow" fields correctly handle invalid input
 		credentials = self.nicol.credentials
 		for_employees = self.nicol.for_employees
@@ -48,7 +48,7 @@ class TestContactFlow(unittest.TestCase):
 		for_employees.enter_contact_email(credentials['email'])
 
 		self.assertTrue(map_page.on())
-		map_page.add('Nintendo of America Washington')
+		map_page.add('Nintendo of America WA')
 
 		self.assertTrue(form_page.on())
 		form_page.set_name('Test Request')
@@ -68,7 +68,7 @@ class TestContactFlow(unittest.TestCase):
 			'p', error.format(phone=phone)))
 
   def test_required_fields(self):
-		"""public : Contact Flow .                           required fields"""
+		"""public : Contact Flow .                           required_fields"""
 		# assert "Contact Flow" fields are required as expected
 		credentials = self.nicol.credentials
 		for_employees = self.nicol.for_employees
@@ -83,7 +83,7 @@ class TestContactFlow(unittest.TestCase):
 		for_employees.enter_contact_email(credentials['email'])
 
 		self.assertTrue(map_page.on())
-		map_page.add('Nintendo of America Washington')
+		map_page.add('Nintendo of America WA')
 
 		self.assertTrue(form_page.on())
 		self.assertFalse(form_page.continue_button.is_enabled())
@@ -112,7 +112,7 @@ class TestForEmployees(unittest.TestCase):
 		self.driver.quit()
 
   def test_about_page(self):
-		"""public : ForEmployees .                                about page"""
+		"""public : ForEmployees .                                about_page"""
 		# assert about page links and forms work as expected
 		for_employers = self.nicol.for_employers
 		for_employees = self.nicol.for_employees
@@ -155,7 +155,7 @@ class TestForEmployees(unittest.TestCase):
 		self.assertTrue(map_page.on())
 
   def test_contact_us_page(self):
-		"""public : ForEmployees .                         contact us page"""
+		"""public : ForEmployees .                         contact_us_page"""
 		# assert Contact Us page links and forms work as expected
 		for_employers = self.nicol.for_employers
 		contact_page = self.nicol.contact_us_page
@@ -180,7 +180,7 @@ class TestForEmployees(unittest.TestCase):
 		  self.assertTrue(contact_page.on())
 		  contact_page.header.click_for_employers()
 		else:
-		  contact_page.header.select_action('employees')
+		  contact_page.header.select_action('employers')
 		  self.assertTrue(for_employers.on())
 		  for_employers.footer.click_link('contact us')
 
@@ -363,7 +363,7 @@ class TestForEmployers(unittest.TestCase):
 		self.driver.quit()
 
   def test_demo_form(self):
-		"""public : For Employers .                                demo form"""
+		"""public : For Employers .                                demo_form"""
 		# assert Employers
 		for_employers = self.nicol.for_employers
 
@@ -625,7 +625,7 @@ class TestForEmployers(unittest.TestCase):
 		accept_page.click_continue('employer')
 
 		self.assertTrue(add_page.on())
-		add_page.add('Nintendo of America Washington')
+		add_page.add('Nintendo of America WA')
 
 		self.assertTrue(prefilled_page.on())
 		prefilled_page.set('ein', ein)

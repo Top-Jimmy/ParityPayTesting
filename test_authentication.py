@@ -499,7 +499,6 @@ class TestRemember(unittest.TestCase):
 	def tearDown(self):
 		self.driver.quit()
 
-	# @unittest.skip("Not finished")
 	# @unittest.skipIf(not main.is_web(), 'For web only')
 	def test_remember_me(self):
 		"""authentication : Remember .                    test_remember_me"""

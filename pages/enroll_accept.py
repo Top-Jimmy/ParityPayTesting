@@ -4,7 +4,7 @@ import main
 import time
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import (NoSuchElementException,
-	StaleElementReferenceException, WebDriverException)
+	StaleElementReferenceException, WebDriverException, TimeoutException)
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -46,10 +46,15 @@ class EnrollAcceptPage(Page):
 
 	def click_continue(self, invite_type="employee"):
 		self.move_to_el(self.continue_button)
-		# Landing page depends on if this was employee or admin invite
-		if invite_type == 'employee': # Should land on employee-welcome
-			WDW(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, 'welcome-next')))
-		elif invite_type == 'employer': #land on add business map
-			WDW(self.driver, 20).until(EC.presence_of_element_located((By.ID, 'busName')))
-		else: # Should land on lobby page. Wait for invite card to show up
-			WDW(self.driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, 'invitations_card')))
+		# Landing page depends on if this was employer, employee or admin invite
+		try:
+			if invite_type == 'employee': # Should land on employee-welcome
+				WDW(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, 'welcome-next')))
+
+			elif invite_type == 'employer': #land on add business map
+				WDW(self.driver, 20).until(EC.presence_of_element_located((By.ID, 'busName')))
+			else: # (Admin) Should land on lobby page. Wait for invite card to show up
+				WDW(self.driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, 'invitations_card')))
+		except TimeoutException:
+				print('Failed to load correct screen after finishing invitation. Invite type: ' + str(invite_type))
+				raise Exception('Failed to load correct page after finishing invitation.')

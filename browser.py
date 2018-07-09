@@ -9,7 +9,7 @@ import main
 
 def get_url(env, device_farm):
   if env == 'desktop':
-    return 'http://127.0.0.1:5050/wd/hub'
+    return 'http://127.0.0.1:5051/wd/hub'
   elif device_farm:
     # AWS Device Farm:
     return 'http://localhost:4723/wd/hub'

@@ -30,8 +30,8 @@ class BusinessPrefilledPage(Page):
 	def load_body(self):
 		self.form = self.driver.find_element_by_class_name('form-horizontal')
 		find_by = self.form.find_elements_by_tag_name
-		self.ein_input = find_by('input')[0]
-		self.hr_email_input = find_by('input')[1]
+		self.ein_input = self.form.find_element_by_id('ein')
+		self.hr_email_input = self.form.find_element_by_id('hr_email')
 		self.details_button = find_by('button')[0]
 		self.load_agree_checkbox()
 

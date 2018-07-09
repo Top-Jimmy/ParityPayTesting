@@ -271,6 +271,15 @@ class Profile:
     else:
       return ''.join(str(random.randint(int(lower_bound), int(upper_bound))) for _ in xrange(num_digits))
 
+  def generate_rfc_dob(self):
+    # RFC format: yymmdd
+    # Dob format: mm/dd/yy
+    year = '19' + ''.join(str(random.randint(0, 9)) for _ in xrange(2))
+    month = str(random.randint(1, 12)).zfill(2)
+    day = str(random.randint(1, 30)).zfill(2)
+    values = [month, day, year]
+    return '/'.join(values)
+
   def generate_bbva_amount(self, small_amount=True):
     # Increments of 100, 0-8,000
     upper_max = 7

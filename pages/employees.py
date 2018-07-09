@@ -245,7 +245,7 @@ class EmployeePage(Page):
 				class_name = "{command}_employee".format(command=command_text.lower())
 				option = self.driver.find_element_by_class_name(class_name)
 				option.click()
-				WDW(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'confirm_remove')))
+				WDW(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'confirm_remove')))
 				if command_text.lower() == 'remove':
 					self.load_remove_form()
 		except NoSuchElementException:

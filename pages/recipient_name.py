@@ -138,7 +138,7 @@ class RecipientNamePage(Page):
     # Convert from string to list
     if not isinstance(name, (list,)):
       name = name.split()
-      if len(name) == 2:
+      if len(name) == 2: # Add index for second surname
         name.append('')
 
     if name[0] is not None:

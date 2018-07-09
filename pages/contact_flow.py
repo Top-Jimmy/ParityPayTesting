@@ -29,8 +29,6 @@ class ContactMapPage(Page):
 	def try_load_continue_button(self):
 		try:
 			find_by = self.driver.find_element_by_class_name
-			# self.continue_button = (
-			# find_by("sm-continue-button").find_element_by_tag_name('button'))
 			self.continue_button = find_by("sm-continue-button")
 		except NoSuchElementException:
 			self.continue_button = None
@@ -39,27 +37,59 @@ class ContactMapPage(Page):
 		self.select_location(location, option)
 		WDW(self.driver, 10).until(EC.presence_of_element_located(
 			(By.CLASS_NAME, 'sm-continue-button')))
-		#time.sleep(1)
 		self.click_continue()
 
-	def select_location(self, location, option=1):
-		self.set_location(location)
-		self.options = (
-			self.driver.find_elements_by_class_name("sm-place-menuitem"))
-		try:
-			self.options[option-1].click()
-		except IndexError:
-			raise Exception("Could not find any google maps search results")
+	def add(self, location, option=0, expectedFailure=False):
+		if self.select_location(location, option):
+			timer = 10
+			if expectedFailure: # Don't want to wait full 10 seconds when adding non-US business
+				timer = 2
+			try:
+				WDW(self.driver, timer).until(EC.presence_of_element_located((By.ID, 'agreed')))
+				return True
+			except Exception as e:
+				print('failed to add business')
+				return False
 
-	def set_location(self, location):
+	def select_location(self, location, option=0):
+		self.type_location(location)
+		if main.is_android():
+				self.try_hide_keyboard()
+
+		unsetOption = True
+		count = 0
+		while count < 5:
+			try:
+				if self.options is not None:
+					self.options[option].click()
+					try:
+						WDW(self.driver, 5).until(EC.element_to_be_clickable(
+							(By.CLASS_NAME, 'sm-continue-button')))
+						self.click_continue()
+						return True
+					except TimeoutException:
+						# no continue button (i.e. adding non-us business)
+						pass
+				return False
+			except StaleElementReferenceException:
+				# Page might have reloaded
+				print('Failed to click location option.')
+			count += 1
+
+		return False
+
+	def type_location(self, location):
 		self.location_input.clear()
 		self.location_input.send_keys(location)
 		if main.is_ios():
 			self.location_input.click()
-
-		WDW(self.driver, 10).until(EC.presence_of_element_located(
-			(By.CLASS_NAME, 'sm-place-menuitem')))
-		#time.sleep(2)
+		# wait up to 5 seconds for options to show up
+		presence = EC.presence_of_all_elements_located
+		try:
+			self.options = WDW(self.driver, 10).until(
+				presence((By.CLASS_NAME, 'sm-place-menuitem')))
+		except TimeoutException:
+			self.options = None
 
 	def click_continue(self):
 		# continue button only there when business is selected

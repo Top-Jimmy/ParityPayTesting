@@ -9,7 +9,7 @@ import messages
 # TestATM - 6
 	# test_add_recipient
 	# test_duplicate
-	# test_edit_pin
+	# test_edit_pin (skipped)
 	# test_navigation
 	# test_no_balance
 	# test_success
@@ -45,33 +45,33 @@ class TestATM(unittest.TestCase):
 		recip = self.cheeks.generate_name()
 		name_page.enter_name(recip)
 
-		self.assertTrue(send_to_atm.on([0, 'Recipient']))
-		send_to_atm.click_recipient(recip)
+		# Should be on additional data form
 		self.assertTrue(send_to_atm.on([0, 'Recipient'], True))
-		rfc = (
-			self.cheeks.generate_string(4, 'upper') +
-			self.cheeks.generate_number(2) + '0' +
-			self.cheeks.generate_number(1, lower_bound=1) + '0' +
-			self.cheeks.generate_number(1, lower_bound=1)
-		)
+		badInfo = {
+			'carrier': 'telcel',
+			'phone': '2022221234',
+			'dob': '02151965'
+		}
 		info = {
 			'carrier': 'telcel',
 			'phone': '2022221234',
-			'rfc': rfc,
-			'pin': self.cheeks.generate_number(4)
+			'dob': self.cheeks.generate_rfc_dob()
 		}
+		# Shouldn't be able to submit form w/out all info
+		send_to_atm.data_form.set_info(badInfo)
+		send_to_atm.submit_data_form()
+		self.assertTrue('Date Format: mm/dd/yyyy' in send_to_atm.data_form.dob_error())
+		# Should not be on amount step. Should be some kind of 'required' warning
+
 		send_to_atm.data_form.set_info(info)
 		returned_info = send_to_atm.data_form.get_info()
 		self.assertEqual(info['carrier'], returned_info['carrier'])
 		self.assertEqual(info['phone'], returned_info['phone'])
-		self.assertEqual(info['rfc'], returned_info['rfc'])
-		self.assertEqual(info['pin'], returned_info['pin'])
+		self.assertEqual(info['dob'], returned_info['dob'])
 		send_to_atm.submit_data_form()
 
 		send_to_atm.set_step(0)
-		# raw_input('about to click recpient0')
 		send_to_atm.click_recipient(recip)
-		# raw_input('clicked recipient. on amount?')
 		self.assertTrue(send_to_atm.on([1, 'Amount']))
 		if not main.is_desktop():
 			send_to_atm.header.click_back()
@@ -135,10 +135,12 @@ class TestATM(unittest.TestCase):
 		self.assertTrue(name_page.on(True))
 		name_page.click_duplicate_continue()
 
-		self.assertTrue(send_to_atm.on([0, 'Recipient']))
+		self.assertTrue(send_to_atm.on([0, 'Recipient'], True))
 		if main.is_desktop():
 			send_to_atm.menu.click_option('recipients')
 		else:
+			send_to_atm.header.click_back()
+			self.assertTrue(send_to_atm.on([0, 'Recipient'], False))
 			send_to_atm.header.click_back()
 			self.assertTrue(eHome.on())
 			eHome.menu.click_option('recipients')
@@ -149,101 +151,102 @@ class TestATM(unittest.TestCase):
 		recip_card.remove_recipient()
 		self.assertTrue(recipient_list.on())
 
-	def test_edit_pin(self):
-		"""SendToATM: ATM .              test_edit_pin"""
-		# Send 100 MXN to Leticia (atm) with pin1. Send 100 to Leticia w/ pin2.
-		# Transfer details page should associate correct pin w/ correct transfer
-		eHome = self.cheeks.eHome_page
-		recip_list = self.cheeks.recipient_page
-		recip_view = self.cheeks.recipient_view_page
-		info_page = self.cheeks.recipient_info_page
-		send_to_atm = self.cheeks.send_to_atm_page
-		td_page = self.cheeks.td_page
-		recip = "Leticia Ortega"
+	# @unittest.skip("PIN no longer user generated")
+	# def test_edit_pin(self):
+	# 	"""SendToATM: ATM .              test_edit_pin"""
+	# 	# Send 100 MXN to Leticia (atm) with pin1. Send 100 to Leticia w/ pin2.
+	# 	# Transfer details page should associate correct pin w/ correct transfer
+	# 	eHome = self.cheeks.eHome_page
+	# 	recip_list = self.cheeks.recipient_page
+	# 	recip_view = self.cheeks.recipient_view_page
+	# 	info_page = self.cheeks.recipient_info_page
+	# 	send_to_atm = self.cheeks.send_to_atm_page
+	# 	td_page = self.cheeks.td_page
+	# 	recip = "Leticia Ortega"
 
-		# Read pin #1
-		self.assertTrue(self.cheeks.login(self.driver), messages.login)
-		eHome.menu.click_option('recipients')
-		self.assertTrue(recip_list.on())
-		recip_list.click_recipient(recip)
-		self.assertTrue(recip_view.on())
-		recip_view.edit_additional_info()
-		self.assertTrue(info_page.on())
-		info = info_page.addInfo.get_info()
-		pin1 = info['pin']
+	# 	# Read pin #1
+	# 	self.assertTrue(self.cheeks.login(self.driver), messages.login)
+	# 	eHome.menu.click_option('recipients')
+	# 	self.assertTrue(recip_list.on())
+	# 	recip_list.click_recipient(recip)
+	# 	self.assertTrue(recip_view.on())
+	# 	recip_view.edit_additional_info()
+	# 	self.assertTrue(info_page.on())
+	# 	info = info_page.addInfo.get_info()
+	# 	pin1 = info['pin']
 
-		if main.is_desktop():
-			info_page.menu.click_option('ehome')
-		else:
-			info_page.header.click_back()
-			self.assertTrue(recip_view.on())
-			recip_view.header.click_back()
-			self.assertTrue(recip_list.on())
-			recip_list.menu.click_option('ehome')
-		self.assertTrue(eHome.on())
-		eHome.send('atm')
+	# 	if main.is_desktop():
+	# 		info_page.menu.click_option('ehome')
+	# 	else:
+	# 		info_page.header.click_back()
+	# 		self.assertTrue(recip_view.on())
+	# 		recip_view.header.click_back()
+	# 		self.assertTrue(recip_list.on())
+	# 		recip_list.menu.click_option('ehome')
+	# 	self.assertTrue(eHome.on())
+	# 	eHome.send('atm')
 
-		self.assertTrue(send_to_atm.on())
-		send_to_atm.click_recipient(recip)
-		self.assertTrue(send_to_atm.on([1, 'Amount']))
-		send_to_atm.send_form.set_bbva_amount('100')
-		send_to_atm.submit_send_form()
+	# 	self.assertTrue(send_to_atm.on())
+	# 	send_to_atm.click_recipient(recip)
+	# 	self.assertTrue(send_to_atm.on([1, 'Amount']))
+	# 	send_to_atm.send_form.set_bbva_amount('100')
+	# 	send_to_atm.submit_send_form()
 
-		send_to_atm.disclosure.click_continue()
-		self.assertTrue(eHome.on('activity'))
-		self.assertEqual(pin1, eHome.get_dialog_pin())
-		eHome.clear_confirmation_dialog()
-		self.assertTrue(eHome.on('activity'))
-		eHome.click_transaction()
-		self.assertTrue(td_page.on(True))
-		self.assertEqual(pin1, td_page.get_pin())
-		td_page.header.click_back()
-		self.assertTrue(eHome.on('activity'))
+	# 	send_to_atm.disclosure.click_continue()
+	# 	self.assertTrue(eHome.on('activity'))
+	# 	self.assertEqual(pin1, eHome.get_dialog_pin())
+	# 	eHome.clear_confirmation_dialog()
+	# 	self.assertTrue(eHome.on('activity'))
+	# 	eHome.click_transaction()
+	# 	self.assertTrue(td_page.on(True))
+	# 	self.assertEqual(pin1, td_page.get_pin())
+	# 	td_page.header.click_back()
+	# 	self.assertTrue(eHome.on('activity'))
 
-		# Change pin
-		eHome.menu.click_option('recipients')
-		self.assertTrue(recip_list.on())
-		recip_list.click_recipient(recip)
-		self.assertTrue(recip_view.on())
-		recip_view.edit_additional_info()
-		self.assertTrue(info_page.on())
-		pin2 = pin1
-		while pin1 == pin2:
-			pin2 = self.cheeks.generate_number(4)
-		info_page.addInfo.set_pin(pin2)
-		info_page.addInfo.click_continue()
-		self.assertTrue(recip_view.on())
+	# 	# Change pin
+	# 	eHome.menu.click_option('recipients')
+	# 	self.assertTrue(recip_list.on())
+	# 	recip_list.click_recipient(recip)
+	# 	self.assertTrue(recip_view.on())
+	# 	recip_view.edit_additional_info()
+	# 	self.assertTrue(info_page.on())
+	# 	pin2 = pin1
+	# 	while pin1 == pin2:
+	# 		pin2 = self.cheeks.generate_number(4)
+	# 	info_page.addInfo.set_pin(pin2)
+	# 	info_page.addInfo.click_continue()
+	# 	self.assertTrue(recip_view.on())
 
-		if main.is_desktop():
-			recip_view.menu.click_option('ehome')
-		else:
-			recip_view.header.click_back()
-			self.assertTrue(recip_list.on())
-			recip_list.menu.click_option('ehome')
-		self.assertTrue(eHome.on('activity'))
-		eHome.send('atm')
+	# 	if main.is_desktop():
+	# 		recip_view.menu.click_option('ehome')
+	# 	else:
+	# 		recip_view.header.click_back()
+	# 		self.assertTrue(recip_list.on())
+	# 		recip_list.menu.click_option('ehome')
+	# 	self.assertTrue(eHome.on('activity'))
+	# 	eHome.send('atm')
 
-		# Send again. Verify pin2 is in transfer details
-		self.assertTrue(send_to_atm.on())
-		send_to_atm.click_recipient(recip)
-		self.assertTrue(send_to_atm.on([1, 'Amount']))
-		send_to_atm.send_form.set_bbva_amount('100')
-		send_to_atm.submit_send_form()
+	# 	# Send again. Verify pin2 is in transfer details
+	# 	self.assertTrue(send_to_atm.on())
+	# 	send_to_atm.click_recipient(recip)
+	# 	self.assertTrue(send_to_atm.on([1, 'Amount']))
+	# 	send_to_atm.send_form.set_bbva_amount('100')
+	# 	send_to_atm.submit_send_form()
 
-		send_to_atm.disclosure.click_continue()
-		self.assertTrue(eHome.on('activity'))
-		eHome.clear_confirmation_dialog()
-		self.assertTrue(eHome.on('activity'))
-		eHome.click_transaction()
-		self.assertTrue(td_page.on(True))
-		self.assertEqual(pin2, td_page.get_pin())
-		td_page.header.click_back()
-		self.assertTrue(eHome.on('activity'))
+	# 	send_to_atm.disclosure.click_continue()
+	# 	self.assertTrue(eHome.on('activity'))
+	# 	eHome.clear_confirmation_dialog()
+	# 	self.assertTrue(eHome.on('activity'))
+	# 	eHome.click_transaction()
+	# 	self.assertTrue(td_page.on(True))
+	# 	self.assertEqual(pin2, td_page.get_pin())
+	# 	td_page.header.click_back()
+	# 	self.assertTrue(eHome.on('activity'))
 
-		# Verify transaction1 still has original pin
-		eHome.click_transaction(1)
-		self.assertTrue(td_page.on(True))
-		self.assertEqual(pin1, td_page.get_pin())
+	# 	# Verify transaction1 still has original pin
+	# 	eHome.click_transaction(1)
+	# 	self.assertTrue(td_page.on(True))
+	# 	self.assertEqual(pin1, td_page.get_pin())
 
 	def test_navigation(self):
 		"""SendToATM: ATM .               test_navigation"""
@@ -405,7 +408,7 @@ class TestATM(unittest.TestCase):
 		self.assertEqual(data['amount'], '-' + total)
 		self.assertEqual(data['recipient'], recip)
 		self.assertEqual(data['icon'], 'clock')
-		self.assertEqual(data['status'], 'Available')
+		self.assertEqual(data['status'], 'Sending') # Available
 
 		# check td page
 		eHome.click_transaction()

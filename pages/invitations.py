@@ -13,6 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 # Employer functionality: Table showing pending invitations
+
 class InvitationsPage(Page):
 	url_tail = 'invitations'
 	dynamic = False
@@ -30,8 +31,6 @@ class InvitationsPage(Page):
 			return False
 
 	def load_body(self):
-		# Wait for invitations to load
-		#time.sleep(.4)
 		self.empty_msg = self.try_load_empty_msg()
 		self.load_toolbar()
 		time.sleep(.4)
@@ -170,51 +169,6 @@ class InvitationsPage(Page):
 			return self.selected_str[:-9] # 2 selected
 		return 0
 
-	# def get_invitation_info(self, table_row):
-	# 	"""Given invitation <tr> parse out info for each column"""
-	# 	tds = table_row.find_elements_by_tag_name('td')
-	# 	info = {
-	# 		'selected': tds[0].is_selected(),
-	# 		'name': tds[1].text,
-	# 		'id': tds[2].text,
-	# 		'phone': tds[3].text,
-	# 		'email': tds[4].text
-	# 	}
-	# 	return info
-
-	# def get_invitation(self, find_by, identifier, info=True):
-	# 	# find_by: 'index' or name of column header
-	# 	# identifier: i of invitation or string we try to match in col[find_by]
-	# 	if self.table_header is not None or not main.is_desktop():
-	# 		table_row = None
-	# 		if find_by == 'index':
-	# 			return self.get_invitation_info(self.invitations[identifier])
-	# 		else:
-	# 			column_index = self.get_column_index(find_by)
-	# 			raw_input('column index: ' + str(column_index))
-	# 			for i, invitation in enumerate(self.invitations):
-	# 				tds = invitation.find_elements_by_tag_name('td')
-	# 				raw_input("text: " + tds[column_index].text)
-	# 				if tds[column_index].text == identifier:
-	# 					table_row = invitation
-
-	# 		if table_row is not None:
-	# 			if info:
-	# 				return self.get_invitation_info(table_row)
-	# 			else:
-	# 				return table_row
-	# 	return None # no invitations, or couldn't find w/ given info
-
-	# def get_column_index(self, column_text):
-	# 	if main.is_desktop():
-	# 		for i, column in enumerate(self.header_cols):
-	# 			if column_text.lower() == column.text.lower():
-	# 				return i
-	# 	else:
-	# 		pass
-	# 	msg = str(column_text) + " is not a column header (Invitations)"
-	# 	raise Exception(msg)
-
 	def get_mobile_row_index(self, row_index):
 	  # Want to ignore text at beginning of each 'table_entry_row'
 	  # Given row_index, return starting index for each row
@@ -312,8 +266,7 @@ class InvitationsPage(Page):
 	 		row = invitation.find_elements_by_tag_name('td')[1]
 
 	 	self.move_to_el(row)
-
-	 	# should go to invitationCard
+	 	# should be on invitationCard
 
 
 	############################# Functionality #################################
@@ -337,7 +290,6 @@ class InvitationsPage(Page):
 
 	def resend_invitations(self):
 		# resend currently selected invitations
-		# raw_input('table selected?')
 		if self.table_state() == 'selected':
 			self.scroll_to_top()
 			self.resend_button.click()

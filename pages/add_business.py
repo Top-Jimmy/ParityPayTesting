@@ -30,11 +30,8 @@ class AddBusinessPage(Page):
 
 	def load_body(self):
 		by_class = self.driver.find_element_by_class_name
-		# css = 'sm-find-business-field'
 		self.location_input = self.driver.find_element_by_id('busName')
 		self.cant_find_button = by_class('sm-skip-button')
-		# self.cant_find_button = (
-		# 	by_class("sm-skip-button").find_element_by_tag_name('button'))
 
 	def add(self, location, option=0, expectedFailure=False):
 		if self.select_location(location, option):
@@ -52,16 +49,27 @@ class AddBusinessPage(Page):
 		self.type_location(location)
 		if main.is_android():
 				self.try_hide_keyboard()
-		if self.options is not None:
-			self.options[option].click()
+
+		unsetOption = True
+		count = 0
+		while count < 5:
 			try:
-				WDW(self.driver, 5).until(EC.element_to_be_clickable(
-					(By.CLASS_NAME, 'sm-continue-button')))
-				self.click_continue()
-				return True
-			except TimeoutException:
-				# no continue button (i.e. adding non-us business)
-				pass
+				if self.options is not None:
+					self.options[option].click()
+					try:
+						WDW(self.driver, 5).until(EC.element_to_be_clickable(
+							(By.CLASS_NAME, 'sm-continue-button')))
+						self.click_continue()
+						return True
+					except TimeoutException:
+						# no continue button (i.e. adding non-us business)
+						pass
+				return False
+			except StaleElementReferenceException:
+				# Page might have reloaded
+				print('Failed to click location option.')
+			count += 1
+
 		return False
 
 	def type_location(self, location):

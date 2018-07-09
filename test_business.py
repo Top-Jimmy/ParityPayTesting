@@ -40,7 +40,7 @@ class TestDetails(unittest.TestCase):
 
 	@unittest.skipIf(main.is_ios(), "iOS")
 	def test_invalid_inputs(self):
-		"""business : Details .                         test_invalid inputs"""
+		"""business : Details .                         test_invalid_inputs"""
 		# assert 'details' page handles invalid input correctly
 		lobby_page = self.nicol.lobby_page
 		add_page = self.nicol.add_business_page
@@ -229,7 +229,7 @@ class TestPrefilled(unittest.TestCase):
 
 		self.assertTrue(add_page.on())
 		name = 'Nintendo of America'
-		search_term = name + ' Washington'
+		search_term = name + ' WA'
 		add_page.add(search_term)
 		self.WDWait.until(EC.presence_of_element_located((By.ID, 'ein')))
 		self.assertTrue(prefilled_page.on())
@@ -250,7 +250,7 @@ class TestPrefilled(unittest.TestCase):
 		self.assertEqual(get('phone'), '(425) 882-2040')
 		# url gets trimmed. no longer has anything after .com
 
-		self.assertEqual(get('website'), 'http://www.nintendo.com')
+		self.assertEqual(get('website'), 'http://nintendo.com')
 		self.assertEqual(get('state'), 'Washington')
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
@@ -279,7 +279,7 @@ class TestPrefilled(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 3, "Priority")
 	def test_invalid_inputs(self):
-		"""business : Prefilled .                   test_invalid inputs"""
+		"""business : Prefilled .                   test_invalid_inputs"""
 		# assert inputs on 'Prefilled' page handle invalid input as expected
 		lobby_page = self.nicol.lobby_page
 		add_page = self.nicol.add_business_page
@@ -291,7 +291,7 @@ class TestPrefilled(unittest.TestCase):
 
 		self.assertTrue(add_page.on())
 		# raw_input('adding business')
-		add_page.add("Nintendo of America Washington")
+		add_page.add("Nintendo of America WA")
 		# raw_input('added?')
 		self.assertTrue(prefilled_page.on())
 		self.assertFalse(prefilled_page.agreed())
@@ -368,7 +368,7 @@ class TestPrefilled(unittest.TestCase):
 		lobby_page.menu.add_a_business()
 
 		self.assertTrue(add_page.on())
-		add_page.add(new_busName + " Washington")
+		add_page.add(new_busName + " WA")
 		self.assertTrue(prefilled_page.on())
 
 		# should be 2 required errors before clearing details inputs
@@ -473,7 +473,7 @@ class TestPrefilled(unittest.TestCase):
 		new_busName = 'Nintendo of America'
 		ein = '556787898'
 		hr_email = "tester@example.com"
-		add_page.add(new_busName + " Washington")
+		add_page.add(new_busName + " WA")
 
 		self.assertTrue(prefilled_page.on())
 		prefilled_page.toggle_agree()
@@ -484,7 +484,7 @@ class TestPrefilled(unittest.TestCase):
 		prefilled_page.set_state("California")
 		self.assertEqual(get('state'),"California")
 
-		prefilled_page.set('ein', ein)
+		self.assertTrue(prefilled_page.set('ein', ein))
 		prefilled_page.set('hr_email', hr_email)
 		#prefilled_page.toggle_agree()
 		self.assertTrue(prefilled_page.agreed())
@@ -528,7 +528,7 @@ class TestPrefilled(unittest.TestCase):
 		self.assertEqual(get('postal_code'), '98052')
 		self.assertEqual(get('phone'), '(425) 882-2040')
 
-		self.assertEqual(get('website'), 'http://www.nintendo.com')
+		self.assertEqual(get('website'), 'http://nintendo.com')
 		self.assertEqual(get('state'), 'California')
 		settings_page.remove_business("REMOVE NINTENDO OF AMERICA")
 
@@ -587,7 +587,7 @@ class TestPrefilled(unittest.TestCase):
 		new_busName = 'Nintendo of America'
 		ein = '556787898'
 		hr_email = "nicol@sendmi.com"
-		add_page.add(new_busName + " Washington")
+		add_page.add(new_busName + " WA")
 
 		self.assertTrue(prefilled_page.on())
 		prefilled_page.click_details()
@@ -664,7 +664,7 @@ class TestPrefilled(unittest.TestCase):
 		self.assertEqual(get('phone'), '(425) 882-2040')
 		# no longer has stuff after .com (/corp/)
 
-		self.assertEqual(get('website'), 'http://www.nintendo.com')
+		self.assertEqual(get('website'), 'http://nintendo.com')
 		self.assertEqual(get('state'), 'California')
 		settings_page.remove_business("REMOVE NINTENDO OF AMERICA")
 
@@ -767,7 +767,7 @@ class TestSettings(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 3, "Priority")
 	def test_invalid_inputs(self):
-		"""business : Settings .                      test_invalid inputs"""
+		"""business : Settings .                      test_invalid_inputs"""
 		# assert 'Business Settings' page handles invalid inputs as expected
 		lobby_page = self.patrick.lobby_page
 		emp_page = self.patrick.employee_page
@@ -786,7 +786,7 @@ class TestSettings(unittest.TestCase):
 
 		self.assertTrue(add_page.on())
 		business_name = "Nintendo of America"
-		search_term = business_name + ' Washington'
+		search_term = business_name + ' WA'
 		add_page.add(search_term)
 		prefilled_page.load()
 		ein = "66787665"
@@ -960,7 +960,7 @@ class TestSettings(unittest.TestCase):
 
 		self.assertTrue(add_page.on())
 		business_name = "Nintendo of America"
-		search_term = business_name + ' Washington'
+		search_term = business_name + ' WA'
 		add_page.add(search_term)
 		self.assertTrue(prefilled_page.on())
 		ein = "66787665"

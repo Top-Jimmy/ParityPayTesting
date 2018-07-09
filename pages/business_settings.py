@@ -193,16 +193,12 @@ class BusinessSettingsPage(Page):
 			self.confirm_code_input = (
 				self.driver.find_element_by_id('removeBusCode'))
 			buttons = self.driver.find_elements_by_tag_name('button')
-			# self.cancel_remove_button = buttons[-2]
-			# self.confirm_remove_button = buttons[-1]
 			self.cancel_remove_button = (
 				self.driver.find_element_by_class_name('remove_business_cancel'))
 			self.confirm_remove_button = (
 				self.driver.find_element_by_class_name('remove_business_ok'))
-			print('loaded remove popup')
 		except NoSuchElementException:
 			self.confirm_code_input = None
-			print('no remove popup')
 			self.cancel_remove_button = None
 			self.confirm_remove_button = None
 
@@ -214,7 +210,6 @@ class BusinessSettingsPage(Page):
 			self.try_hide_keyboard()
 			time.sleep(.4)
 		self.move_to_el(self.confirm_remove_button)
-		# self.confirm_remove_button.click()
 		time.sleep(2)
 
 	def set_remove_code(self, code):

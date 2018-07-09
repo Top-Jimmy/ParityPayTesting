@@ -48,13 +48,10 @@ class SendToATMPage(Page):
 
 	def load_recipients(self, isDataStep):
 		# Recipient list or additional data form?
-		# self.add_recipient_button = self.try_load_add_button()
-		# self.addData_button = self.try_load_additional_data_button()
 		if isDataStep: # Additional data form
 			# print('loading info')
 			self.load_additional_info()
 		else: # Recipient list (default)
-			# print('loading recipients')
 			# todo: sometimes page loads before button is there, so it's None
 			# Sometimes fails test_send_to_atm.py:TestATM.test_add_recipient
 			self.add_recipient_button = self.try_load_add_button()
@@ -115,7 +112,8 @@ class SendToATMPage(Page):
 			self.move_to_el(recip)
 			# Not necessarily on next step. Handle reloading in test
 		else:
-			raise Exception("Error: could not find recipient: " + identifier)
+			raw_input(str(identifier) + '?')
+			raise Exception("Error: could not find recipient: " + str(identifier))
 
 	def add_recipient(self):
 		self.scroll_to_bottom()

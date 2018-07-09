@@ -15,9 +15,9 @@ config = {
 # base_url = 'http://localtest.sendmi.com:3000/'
 base_url =  "https://test.sendmi.com/"   # google test server
 if config['browser'] is 'native':
-  version = 'V 1.0.31'
+  version = 'V 1.0.36'
 else:
-  version = 'V 1.0.31'
+  version = 'V 1.0.36'
 
 def get_env():
   return config['env'].lower()

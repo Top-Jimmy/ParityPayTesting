@@ -208,11 +208,12 @@ class Page:
 
   def try_hide_keyboard(self):
     """If open, close android keyboard"""
-    try:
-      self.driver.hide_keyboard()
-      time.sleep(.6)
-    except WebDriverException:
-      pass
+    if main.is_android():
+      try:
+        self.driver.hide_keyboard()
+        time.sleep(.6)
+      except WebDriverException:
+        pass
 
   def has_horizontal_scroll(self):
     """Try to scroll 100px to right and return window offset"""

@@ -103,7 +103,7 @@ class AdminPage(Page):
 			#Must click text on mobile. Extend hitbox to left edge?
 			if not main.is_desktop():
 				admin = admin.find_elements_by_class_name('table_entry_row')[0]
-			admin.click()
+			self.move_to_el(admin)
 		else:
 			print('could not find admin with name: ' + name)
 

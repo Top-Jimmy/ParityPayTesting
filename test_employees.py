@@ -86,22 +86,45 @@ class TestAdd(unittest.TestCase):
 		self.assertTrue(admin_page.on())
 		admin_page.menu.sign_out()
 
-		# lobby_page = self.lili.lobby_page
 		invite_page = self.lili.invitations_page
+		add_page = self.lili.employee_add_page
 		pending_elections_page = self.lili.pending_elections_page
 		employee_page = self.lili.employee_page
 
 		self.assertTrue(self.lili.login(self.driver), messages.login)
 		self.assertTrue(lobby_page.on())
 
+		# Invitations: Create invitation then delete
 		lobby_page.menu.click_option('invitations')
 		self.assertTrue(invite_page.on())
+		invite_page.add_invitation()
+		self.assertTrue(add_page.on())
+		add_page.set_value('first_name', 'Bogus')
+		add_page.set_value('last_name', 'Invitation')
+		add_page.set_value('email', self.lili.generate_email())
+		add_page.set_value('phone', '202491' + self.lili.generate_number(4))
+		add_page.set_value('zip_code', '12345')
+		add_page.set_value('dob', '01/01/1984')
+		add_page.set_value('employee_id', self.lili.generate_number(8))
+		add_page.click_continue()
+
+		# Ends up on employees page. SHOULD end up on invitation page
+		self.assertTrue(employee_page.on())
+		employee_page.menu.click_option('invitations')
+		self.assertTrue(invite_page.on())
+		# Delete last invitation
+		num_invites = invite_page.num_invitations()
+		invite_page.toggle_invitation('index', num_invites - 1)
+		invite_page.delete_invitations()
+
 		invite_page.menu.click_option('pending elections')
 		self.assertTrue(pending_elections_page.on())
+		# todo: test processing election
 		pending_elections_page.menu.click_option('employees')
 		self.assertTrue(employee_page.on())
 		employee_page.menu.sign_out()
 
+		# Reset: Remove lili's permissions
 		self.assertTrue(self.nicol.login(self.driver), messages.login)
 		self.assertTrue(lobby_page.on())
 		if lobby_page.menu.get_current_business() is not business:
@@ -566,6 +589,8 @@ class TestAdd(unittest.TestCase):
 
 		# Go to page 4
 		self.assertTrue(invitations_page.next_page())
+		# if invitations_page.num_invitations() > 1:
+		# 	invitations_page
 		self.assertEqual(1, invitations_page.num_invitations())
 		self.assertEqual(4, invitations_page.current_page())
 		self.assertFalse(invitations_page.next_page())
@@ -633,7 +658,7 @@ class TestAdd(unittest.TestCase):
 		first_name = 'Poli'
 		last_name = 'Wag'
 		email = self.nicol.generate_email()
-		#print('email: ' + email)
+		print('email: ' + email)
 		phone = '202341' + self.nicol.generate_number(4)
 		#print('phone: ' + phone)
 		employee_id = self.nicol.generate_number(8)
@@ -652,6 +677,10 @@ class TestAdd(unittest.TestCase):
 
 		# verify invitation in invitation table
 		# Bug: on employee table
+		if main.is_web():
+			self.assertTrue(emp_page.on())
+			emp_page.menu.click_option('invitations')
+
 		self.assertTrue(invitations_page.on())
 		urls = invitations_page.get_secret_urls()
 		invitation = (

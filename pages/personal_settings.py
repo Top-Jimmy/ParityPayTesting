@@ -124,12 +124,20 @@ class SettingsPage(Page):
 
   def edit_phone(self, identifier):
     find_els_by = self.form.find_elements_by_class_name
-    self.edit_phone_buttons = find_els_by('settings_phone')
-    if type(identifier) is int:
-      self.move_to_el(self.edit_phone_buttons[identifier])
-    else:
-      phone_index = self.get_phone_index(identifier)
-      self.move_to_el(self.edit_phone_buttons[phone_index])
+    try:
+      self.edit_phone_buttons = find_els_by('settings_phone')
+      if type(identifier) is int:
+        self.move_to_el(self.edit_phone_buttons[identifier])
+      else:
+        phone_index = self.get_phone_index(identifier)
+        phone_button = self.edit_phone_buttons[phone_index]
+        if phone_button is None:
+          print('Could not find phone#: ' + str(identifier))
+          return False
+        self.move_to_el(phone_button)
+      return True
+    except StaleElementReferenceException:
+      return False
 
   def get_phone_index(self, identifier):
     for i, email in enumerate(self.edit_phone_buttons):
@@ -141,11 +149,15 @@ class SettingsPage(Page):
   def has_phone(self, phone_num):
     find_els_by = self.form.find_elements_by_class_name
     self.edit_phone_buttons = find_els_by('settings_phone')
-    for i, phone in enumerate(self.edit_phone_buttons):
-      text = self.edit_phone_buttons[i].text
-      if text == phone_num:
-        return True
-    return False
+    try:
+      for i, phone in enumerate(self.edit_phone_buttons):
+        text = self.edit_phone_buttons[i].text
+        if text == phone_num:
+          return True
+      return False
+    except StaleElementReferenceException:
+      print('personal settings page probably reloaded')
+      self.has_phone(phone_num)
 
   def add_phone(self):
     self.move_to_el(self.add_phone_button)
