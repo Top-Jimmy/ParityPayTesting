@@ -281,6 +281,7 @@ class InvitationsPage(Page):
 		self.load()
 
 	def toggle_invitation(self, find_by='index', identifier=0):
+		self.click_toast()
 		invitation = self.get_table_entry(find_by, identifier)
 		if invitation is not None:
 			checkbox = invitation.find_element_by_tag_name('input')

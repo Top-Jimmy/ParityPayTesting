@@ -8,7 +8,8 @@ import messages
 
 # TestBank - 6
 	# test_add_account
-	# test_add_recipient
+	# test_add_mx_recipient
+	# test_add_us_recipient
 	# test_duplicate
 	# test_navigation
 	# test_no_balance
@@ -68,16 +69,22 @@ class TestBank(unittest.TestCase):
 		bank_page.remove()
 		self.assertTrue(recip_card.on())
 
-	def test_add_recipient(self):
-		"""SendToBank: Bank .               test_add_recipient"""
+	def test_add_mx_recipient(self):
+		"""SendToBank: Bank .               test_add_mx_recipient"""
+		# Should remember DOB when adding info for ATM
 		eHome = self.cheeks.eHome_page
 		send_to_bank = self.cheeks.send_to_bank_page
+		send_to_atm = self.cheeks.send_to_atm_page
 		recipient_list = self.cheeks.recipient_page
 		name_page = self.cheeks.recipient_name_page
 		bank_page = self.cheeks.bank_account_page
 		recip_card = self.cheeks.recipient_view_page
+		
+		recip_1 = self.cheeks.generate_name()
+		clabe = '032180000118359719'
+		dob = self.cheeks.generate_rfc_dob()
 
-		# Add new recipient. Click back to recipient list. Add account for recipient.
+		# Add new US recipient. Click back to recipient list. Add account for recipient.
 		self.assertTrue(self.cheeks.login(self.driver), messages.login)
 		eHome.send('bank')
 		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
@@ -91,10 +98,10 @@ class TestBank(unittest.TestCase):
 		self.assertEqual('United States', name_page.get_location())
 		name_page.set_location('mx')
 		self.assertEqual('Mexico', name_page.get_location())
-		recip_1 = self.cheeks.generate_name()
 		name_page.enter_name(recip_1)
 
 		# Should go directly to adding a bank account after adding recipient
+		# Bank account location should default to location of recipient
 		self.assertTrue(bank_page.on())
 		bank_page.header.click_back()
 		self.assertTrue(recipient_list.on())
@@ -102,12 +109,57 @@ class TestBank(unittest.TestCase):
 		self.assertTrue(bank_page.on())
 		routing_num = "031000503"
 		acct_num = self.cheeks.generate_number(8)
-		bank_page.set_routing(routing_num)
-		bank_page.set_account(acct_num)
-		bank_page.set_account_type('savings')
+		self.assertEqual('Mexico', bank_page.get_location())
+		bank_page.set_location('us')
+		self.assertEqual('United States', bank_page.get_location())
+		bank_page.set_location('mx')
+		self.assertEqual('Mexico', bank_page.get_location())
+		bank_page.set_clabe(clabe)
 		bank_page.click_continue()
 
-		# Add new recipient. Add account for recipient
+		# MX accounts should prompt for DOB after selecting bank account
+		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
+		self.assertTrue(send_to_bank.click_account(recip_1, 0, True))
+		send_to_bank.set_dob(dob)
+
+		# Verify DOB is autofilled when trying to send to ATM
+		send_to_bank.menu.click_option('ehome')
+		self.assertTrue(eHome.on())
+		eHome.send('atm')
+		self.assertTrue(send_to_atm.on([0, 'Recipient']))
+		send_to_atm.click_recipient(recip_1)
+		self.assertTrue(send_to_atm.on([0, 'Recipient'], True))
+		info = send_to_atm.data_form.get_info()
+		self.assertEqual(info['dob'], dob)
+
+		# Delete recip_1		
+		send_to_atm.header.click_back()
+		self.assertTrue(send_to_atm.on([0, 'Recipient']))
+		send_to_atm.header.click_back()
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('recipients')
+		self.assertTrue(recipient_list.on())
+		recipient_list.click_recipient(recip_1)
+		self.assertTrue(recip_card.on())
+		recip_card.remove_recipient()
+		self.assertTrue(recipient_list.on())
+
+	def test_add_us_recipient(self):
+		"""SendToBank: Bank .               test_add_us_recipient"""
+		eHome = self.cheeks.eHome_page
+		send_to_bank = self.cheeks.send_to_bank_page
+		recipient_list = self.cheeks.recipient_page
+		name_page = self.cheeks.recipient_name_page
+		bank_page = self.cheeks.bank_account_page
+		recip_card = self.cheeks.recipient_view_page
+
+		recip_1 = self.cheeks.generate_name()
+		routing_num = "031000503"
+		acct_num = self.cheeks.generate_number(8)
+
+		# Add new US recipient. Click back to recipient list. Add account for recipient.
+		self.assertTrue(self.cheeks.login(self.driver), messages.login)
+		eHome.send('bank')
 		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
 		send_to_bank.add_account()
 		self.assertTrue(recipient_list.on())
@@ -117,36 +169,37 @@ class TestBank(unittest.TestCase):
 		self.assertEqual('Mexico', name_page.get_location())
 		name_page.set_location('us')
 		self.assertEqual('United States', name_page.get_location())
-		name_page.set_location('mx')
-		self.assertEqual('Mexico', name_page.get_location())
-		recip_2 = self.cheeks.generate_name()
-		name_page.enter_name(recip_2)
+		name_page.enter_name(recip_1)
 
+		# Should go directly to adding a bank account after adding recipient
+		# Bank account location should default to location of recipient
 		self.assertTrue(bank_page.on())
-		routing_num = "031000503"
-		acct_num = self.cheeks.generate_number(8)
+		bank_page.header.click_back()
+		self.assertTrue(recipient_list.on())
+		recipient_list.click_recipient(recip_1)
+		self.assertTrue(bank_page.on())
+		self.assertEqual('United States', bank_page.get_location())
+		bank_page.set_location('mx')
+		self.assertEqual('Mexico', bank_page.get_location())
+		bank_page.set_location('us')
 		bank_page.set_routing(routing_num)
 		bank_page.set_account(acct_num)
 		bank_page.set_account_type('savings')
 		bank_page.click_continue()
 
-		# Go to recipients and delete both
+		# Shouldn't ask for DOB when sending to US bank account
 		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
+		send_to_bank.click_account(recip_1, 0)
+		self.assertTrue(send_to_bank.on([1, 'Specify Amount']))
 
-		# todo: verify account info is as expected
-
-		if not main.is_desktop():
-			send_to_bank.header.click_back()
-			self.assertTrue(eHome.on())
-			eHome.menu.click_option('recipients')
-		else:
-			send_to_bank.menu.click_option('recipients')
+		# Go to recipients and delete both
+		send_to_bank.header.click_back()
+		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
+		send_to_bank.header.click_back()
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('recipients')
 		self.assertTrue(recipient_list.on())
 		recipient_list.click_recipient(recip_1)
-		self.assertTrue(recip_card.on())
-		recip_card.remove_recipient()
-		self.assertTrue(recipient_list.on())
-		recipient_list.click_recipient(recip_2)
 		self.assertTrue(recip_card.on())
 		recip_card.remove_recipient()
 		self.assertTrue(recipient_list.on())

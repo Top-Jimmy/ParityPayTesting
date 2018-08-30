@@ -9,7 +9,7 @@ import main
 
 def get_url(env, device_farm):
   if env == 'desktop':
-    return 'http://127.0.0.1:5051/wd/hub'
+    return 'http://127.0.0.1:5050/wd/hub'
   elif device_farm:
     # AWS Device Farm:
     return 'http://localhost:4723/wd/hub'
@@ -38,8 +38,8 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
       desired_caps = {
         'platformName': 'Android',
         'platformVersion': '8.0',
-        'deviceName': 'Pixel_API_24',
-        'avd': 'Pixel_API_24',
+        'deviceName': 'Pixel_API_28', # 'Nexus_6',
+        'avd': 'Pixel_API_28', # 'Nexus_6',
         'app': app_path,
         'autoWebview': 'true',
         'autoGrantPermissions': 'true'
@@ -48,9 +48,9 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
       desired_caps = {
         'platformName': 'Android',
         'platformVersion': '8.0',
-        'deviceName': 'Pixel_API_24',
+        'deviceName': 'Pixel_API_28', # 'Nexus_6', # 
         'browserName': 'Chrome',
-        'avd': 'Pixel_API_24',
+        'avd': 'Pixel_API_28', # 'Nexus_6', # 
         'autoGrantPermissions': 'true',
         'automationName': 'UiAutomator2',
       }
@@ -59,7 +59,7 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
       app_path = '/Users/andrewtidd/ppay10/cordova/platforms/ios/build/emulator/sendmi.app'
       desired_caps = {
         'platformName': 'iOS',
-        'platformVersion': '11.2',
+        'platformVersion': '11.4',
         'deviceName': 'iPhone SE',
         'app': app_path,
         'automationName': 'XCUITest',
@@ -68,7 +68,7 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
     else: # web
       desired_caps = {
         'platformName': 'iOS',
-        'platformVersion': '11.2',
+        'platformVersion': '11.4',
         'browserName': 'Safari',
         'deviceName': 'iPhone SE',
         'automationName': 'XCUITest'

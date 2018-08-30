@@ -71,6 +71,7 @@ class EHomePage(Page):
 		self.cardNames = ['bank', 'atm']
 		self.send_to_bank = self.cards[0]
 		self.send_to_atm = self.cards[1]
+		self.learn_more = self.send_to_atm.find_element_by_class_name('atm_learn_more')
 		# self.send_to_cashout = self.cards[2]
 
 	def send(self, sendOption):
@@ -83,6 +84,58 @@ class EHomePage(Page):
 		self.cards[index].click()
 		# Should be new page (send-to-bank, send-to-atm, send-to-cashout)
 
+	def learn_more_action(self, action):
+		try:
+			self.move_to_el(self.learn_more)
+		except WebDriverException:
+			raw_input('inspect')
+		WDW(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'bank_get_started')))
+		time.sleep(1)
+		# action[0] is 'Get Started' button on card. action[1,2,3] are what we want
+		actions = self.driver.find_elements_by_class_name('bank_get_started')
+		if action == 0: # How to send to atm
+			actions[1].click()
+			WDW(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'welcome-skip')))
+			self.load_how_to()
+		elif action == 1: # Find BBVA Bancomer locations
+			actions[2].click()
+			self.load_find_atm()
+		elif action == 2: # FAQ
+			actions[3].click()
+			# Todo: Load 'coming soon' popup
+
+	def load_how_to(self):
+		try:
+			# Don't get close/next buttons on last step. Only get done button on last step
+			self.how_to_close = self.driver.find_element_by_class_name('welcome-skip')
+			self.how_to_next = self.driver.find_element_by_class_name('welcome-next')
+			self.how_to_done = None
+		except NoSuchElementException:
+			self.how_to_close = None
+			self.how_to_next = None
+			self.how_to_done = self.driver.find_element_by_class_name('welcome-done')
+
+	def click_how_to_next(self):
+		if self.how_to_next:
+			self.how_to_next.click()
+			time.sleep(1)
+			self.load_how_to()
+
+	def load_find_atm(self):
+		WDW(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'bbva_address')))
+		self.atm_locator = self.driver.find_element_by_id('bbva_address')
+
+	def find_atm(self, locator):
+		if self.atm_locator:
+			self.atm_locator.send_keys(locator)
+		
+	def close_find_atm(self):
+		AC(self.driver).send_keys(Keys.ESCAPE).perform()
+		# if main.is_desktop():
+		# 	AC(self.driver).send_keys(Keys.ESCAPE).perform()		
+		# else:
+		# 	# Doesn't work on Android
+		# 	self.driver.press_keycode(10)
 
 ##################### Election Tab #######################
 

@@ -11,6 +11,8 @@ from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+from appium.webdriver.common.touch_action import TouchAction as TA
+
 class PubHeader(Component):
 	"""load content of element id='sendmi_public_appbar'"""
 
@@ -108,18 +110,6 @@ class PubHeader(Component):
 			self.action_sign_in = None
 			self.action_signed_in = None
 
-	# def load_action_employers_link(self):
-	#     try:
-	#         return self.cont.find_element_by_id('public_enroll')
-	#     except NoSuchElementException:
-	#         return None
-
-	# def load_action_employees_link(self):
-	#     try:
-	#         return self.cont.find_element_by_id('public_enroll_employees')
-	#     except NoSuchElementException:
-	#         return None
-
 	# header functions
 
 	def click_logo(self):
@@ -129,6 +119,10 @@ class PubHeader(Component):
 			# scrolled to top on desktop and we need to load other logo
 			logo = self.cont.find_element_by_id('public_logo')
 
+		# action = AC(self.driver)
+		# action.move_to_element(logo)
+		# action.perform()
+		# TA(self.driver).move_to(logo).perform()
 		AC(self.driver).move_to_element(logo).perform()
 		logo.click()
 
@@ -142,19 +136,6 @@ class PubHeader(Component):
 
 	def load_feedback_form(self):
 		pass
-
-	# def select_language(self,language):
-	#     AC(self.driver).move_to_element(self.language_dd).perform()
-	#     if not self.english.is_displayed():
-	#         self.language_dd.click()
-	#         time.sleep(.6)
-	#     if (language == 'English'):    #alt-code: 0233
-	#         self.english.click()
-	#     elif (language == 'Spanish'):  #alt-code: 164
-	#         self.spanish.click()
-	#     time.sleep(.6)
-	#     # need to reload page after changing language
-	#     self.load()
 
 	def click_for_employers(self):
 		if self.for_employers != None:

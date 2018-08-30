@@ -10,6 +10,7 @@ import messages
 	# test_add_recipient
 	# test_duplicate
 	# test_edit_pin (skipped)
+	# test_learn_more
 	# test_navigation
 	# test_no_balance
 	# test_success
@@ -47,21 +48,38 @@ class TestATM(unittest.TestCase):
 
 		# Should be on additional data form
 		self.assertTrue(send_to_atm.on([0, 'Recipient'], True))
-		badInfo = {
+		noCarrier = {
+			'carrier': '',
+			'phone': '2022221234',
+			'dob': self.cheeks.generate_rfc_dob()
+		}
+		noDOB = {
 			'carrier': 'telcel',
 			'phone': '2022221234',
-			'dob': '02151965'
+			'dob': ''
 		}
-		info = {
-			'carrier': 'telcel',
+		noPhone = {
+			'carrier': 'at&t',
+			'phone': '',
+			'dob': self.cheeks.generate_rfc_dob()
+		}
+		allInfo = {
+			'carrier': 'movistar',
 			'phone': '2022221234',
 			'dob': self.cheeks.generate_rfc_dob()
 		}
 		# Shouldn't be able to submit form w/out all info
-		send_to_atm.data_form.set_info(badInfo)
-		send_to_atm.submit_data_form()
-		self.assertTrue('Date Format: mm/dd/yyyy' in send_to_atm.data_form.dob_error())
-		# Should not be on amount step. Should be some kind of 'required' warning
+		# Should get 'Required' error (not currently getting one for phone, no identifier on carrier)
+		send_to_atm.data_form.set_info(noCarrier) # Do noCarrier first (cannot de-select carrier)
+		send_to_atm.submit_data_form(False)
+		self.assertTrue(send_to_atm.on([0, 'Recipient'], True))
+		# self.assertTrue('Date Format: mm/dd/yyyy' in send_to_atm.data_form.dob_error())
+		send_to_atm.data_form.set_info(noPhone)
+		send_to_atm.submit_data_form(False)
+		self.assertTrue(send_to_atm.on([0, 'Recipient'], True))
+		send_to_atm.data_form.set_info(noDOB)
+		send_to_atm.submit_data_form(False)
+		self.assertTrue('Required' in send_to_atm.data_form.dob_error())
 
 		send_to_atm.data_form.set_info(info)
 		returned_info = send_to_atm.data_form.get_info()
@@ -247,6 +265,53 @@ class TestATM(unittest.TestCase):
 	# 	eHome.click_transaction(1)
 	# 	self.assertTrue(td_page.on(True))
 	# 	self.assertEqual(pin1, td_page.get_pin())
+
+	def test_learn_more(self):
+		"""SendToATM: ATM .              test_learn_more"""
+		eHome = self.cheeks.eHome_page
+		send_to_atm = self.cheeks.send_to_atm_page
+		recipient_list = self.cheeks.recipient_page
+		name_page = self.cheeks.recipient_name_page
+		recip_card = self.cheeks.recipient_view_page
+
+		self.assertTrue(self.cheeks.login(self.driver), messages.login)
+		# Action 0: How to send to ATM
+		eHome.learn_more_action(0)
+		eHome.how_to_close.click()
+		time.sleep(1)
+		eHome.learn_more_action(0)
+		# Step 1
+		self.assertTrue(eHome.how_to_close != None)
+		self.assertTrue(eHome.how_to_next != None)
+		self.assertTrue(eHome.how_to_done == None)
+		eHome.click_how_to_next()
+		# Step 2
+		self.assertTrue(eHome.how_to_close != None)
+		self.assertTrue(eHome.how_to_next != None)
+		self.assertTrue(eHome.how_to_done == None)
+		eHome.click_how_to_next()
+		# Step 3
+		self.assertTrue(eHome.how_to_close != None)
+		self.assertTrue(eHome.how_to_next != None)
+		self.assertTrue(eHome.how_to_done == None)
+		eHome.click_how_to_next()
+		# Step 4
+		self.assertTrue(eHome.how_to_close == None)
+		self.assertTrue(eHome.how_to_next == None)
+		self.assertTrue(eHome.how_to_done != None)
+		eHome.how_to_done.click()
+		time.sleep(1)
+
+		# Action 1: Find BBVA
+		eHome.learn_more_action(1)
+		eHome.find_atm('Monterrey')
+		eHome.close_find_atm()
+		time.sleep(3)
+
+		# Action 2: FAQ
+		eHome.learn_more_action(2)
+		eHome.close_find_atm()
+		self.assertTrue(eHome.on('send'))
 
 	def test_navigation(self):
 		"""SendToATM: ATM .               test_navigation"""

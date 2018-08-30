@@ -4,7 +4,7 @@ import browser
 import profiles
 import main
 import messages
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import (NoSuchElementException, TimeoutException)
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -108,9 +108,6 @@ class TestAdd(unittest.TestCase):
 		add_page.set_value('employee_id', self.lili.generate_number(8))
 		add_page.click_continue()
 
-		# Ends up on employees page. SHOULD end up on invitation page
-		self.assertTrue(employee_page.on())
-		employee_page.menu.click_option('invitations')
 		self.assertTrue(invite_page.on())
 		# Delete last invitation
 		num_invites = invite_page.num_invitations()
@@ -179,10 +176,10 @@ class TestAdd(unittest.TestCase):
 		add_admin_page.set_email(email)
 		add_admin_page.click_send()
 
-		self.assertTrue(emp_page.on())
-		urls = emp_page.get_secret_urls()
-		emp_page.click_toast() # clear toast or cannot click logout (mobile)
-		emp_page.menu.sign_out()
+		self.assertTrue(admin_page.on())
+		urls = admin_page.get_secret_urls()
+		admin_page.click_toast() # clear toast or cannot click logout (mobile)
+		admin_page.menu.sign_out()
 
 		dob_page = self.poli.dob_page
 		invite_page = self.poli.invite_page
@@ -468,8 +465,12 @@ class TestAdd(unittest.TestCase):
 			add_page.click_continue()
 			self.WDWait.until(EC.presence_of_element_located((By.ID, 'undefined_helper')))
 			email_error = self.driver.find_element_by_id('undefined_helper')
-			self.WDWait.until(lambda x: "Invalid email address" in email_error.text)
-			self.assertEqual(1, num_el(tag, 'Invalid email address'))
+			try:
+				self.WDWait.until(lambda x: "Invalid Email address." in email_error.text)
+			except TimeoutException:
+				print('email_error: ' + str(email_error.text))
+				raise TimeoutException('email_error: ' + str(email_error.text))
+			self.assertEqual(1, num_el(tag, 'Invalid Email address.'))
 			self.assertEqual(0, num_containing(tag, 'not a valid phone number'))
 		add_page.set_value('email', '')
 
@@ -674,12 +675,6 @@ class TestAdd(unittest.TestCase):
 		add_page.set_value('dob', dob)
 		add_page.set_value('zip_code', zip_code)
 		add_page.click_continue()
-
-		# verify invitation in invitation table
-		# Bug: on employee table
-		if main.is_web():
-			self.assertTrue(emp_page.on())
-			emp_page.menu.click_option('invitations')
 
 		self.assertTrue(invitations_page.on())
 		urls = invitations_page.get_secret_urls()

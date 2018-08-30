@@ -107,6 +107,46 @@ class AdminPage(Page):
 		else:
 			print('could not find admin with name: ' + name)
 
+	############################### Toast Functions ###############################
+
+	def get_secret_urls(self):
+		WDW(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'testSnackId')))
+		#time.sleep(1)
+		self.load()
+		elem = self.driver.find_elements_by_class_name("sm-secret-code")
+		try:
+			email_string = elem[0].text
+			try:
+				email_url = email_string[0:email_string.index(' => ')]
+			except ValueError:
+				pass
+			email = email_string[email_string.index('email:') + 6:]
+		except NoSuchElementException:
+			email = None
+			email_url = None
+		try:
+			phone_string = elem[1].text
+			phone = phone_string[phone_string.index('phone:') + 6:]
+			phone_url = phone_string[0:phone_string.index(' => ')]
+		except IndexError:
+			phone = None
+			phone_url = None
+		return {'email': email, 'phone': phone, 'email_url': email_url,
+			'phone_url': phone_url}
+
+	def click_toast(self):
+		if self.has_toast():
+			self.toast.click()
+			time.sleep(.4)
+
+	def has_toast(self):
+		# is toast visible on page?
+		try:
+			self.toast = self.driver.find_element_by_id('testSnackId')
+			return True
+		except NoSuchElementException:
+			return False
+
 class AddAdminPage(Page):
 	def load(self):
 		try:

@@ -165,7 +165,7 @@ class Page:
         prefix = ''
       move_amount = int(prefix + str(pixels))
 
-      TA(self.driver).press(None,10,400).move_to(None,0,move_amount).release().perform()
+      TA(self.driver).press(None, 10, 400).move_to(None, 0, move_amount).release().perform()
       time.sleep(.6)
 
   # haven't tested on native yet.

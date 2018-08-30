@@ -120,10 +120,11 @@ class SendToATMPage(Page):
 		self.add_recipient_button.click()
 		# Should be on /add-recipient (recipient_name_page)
 
-	def submit_data_form(self):
+	def submit_data_form(self, verify=True):
 		if self.data_form:
 			self.data_form.click_continue()
-			self.on([1, "Amount"])
+			if verify:
+				self.on([1, "Amount"])
 
 
 ############################ 2. Amount Step ###################################

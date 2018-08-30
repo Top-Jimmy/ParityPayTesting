@@ -30,7 +30,8 @@ class SendForm(Component):
 			self.mxn_div = self.try_load_mxn_div()
 			self.mxn_amount = self.try_load_mxn_amount()
 			self.mxn_input = self.try_load_mxn_input()
-			self.try_load_delivery_speed()
+			# BBVA doesn't have a speed option for MX accounts
+			# self.try_load_delivery_speed()
 
 		self.account_balance = (
 			self.form.find_element_by_id('accountBalanceDiv'))

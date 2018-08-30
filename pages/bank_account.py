@@ -254,30 +254,28 @@ class BankAccountPage(Page):
 			return None
 
 	def set_location(self, country):
-		# Only supporting US now.
-		pass
-		# country = country.lower()
-		# el = self.current_location
-		# # if main.is_ios():
-		# # 	el = self.current_location.find_element_by_tag_name('button')
-		# el.click()
-		# WDW(self.driver, 10).until(lambda x : EC.presence_of_element_located(
-		# 	(By.ID, 'location_mx'))
-		# 	or EC.presence_of_element_located((By.ID, 'location_us')))
-		# #time.sleep(1)
-		# try:
-		# 	if country == "us" or country == "united states":
-		# 		self.driver.find_element_by_id('location_us').click()
-		# 	elif country == "mx" or country == "mexico":
-		# 		self.driver.find_element_by_id('location_mx').click()
-		# 	'''WDW(self.driver, 10).until(lambda x: EC.element_to_be_clickable(
-		# 		(By.ID, 'account_clabe'))
-		# 	or EC.element_to_be_clickable((By.ID, 'account_routing'))
-		# 	)'''
-		# 	time.sleep(1)
-		# 	self.load_body()
-		# except NoSuchElementException:
-		# 	print('error! No location option! (ba_page): ' + country)
+		country = country.lower()
+		el = self.current_location
+		# if main.is_ios():
+		# 	el = self.current_location.find_element_by_tag_name('button')
+		el.click()
+		WDW(self.driver, 10).until(lambda x : EC.presence_of_element_located(
+			(By.ID, 'location_mx'))
+			or EC.presence_of_element_located((By.ID, 'location_us')))
+		#time.sleep(1)
+		try:
+			if country == "us" or country == "united states":
+				self.driver.find_element_by_id('location_us').click()
+			elif country == "mx" or country == "mexico":
+				self.driver.find_element_by_id('location_mx').click()
+			'''WDW(self.driver, 10).until(lambda x: EC.element_to_be_clickable(
+				(By.ID, 'account_clabe'))
+			or EC.element_to_be_clickable((By.ID, 'account_routing'))
+			)'''
+			time.sleep(1)
+			self.load_body()
+		except NoSuchElementException:
+			print('error! No location option! (ba_page): ' + country)
 
 	# select country by typing keys, then selecting by pressing enter
 	def type_location(self, country):
