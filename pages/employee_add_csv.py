@@ -5,7 +5,6 @@ from page import Page
 from components import header
 from components import menu
 import time
-from selenium.webdriver import ActionChains
 
 class AddEmployeesCSV1Page(Page):
 	url_tail = 'add-employees'

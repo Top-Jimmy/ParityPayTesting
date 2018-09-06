@@ -7,7 +7,6 @@ import time
 from selenium.common.exceptions import (NoSuchElementException,
   StaleElementReferenceException)
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -177,10 +176,8 @@ class SettingsPage(Page):
 
   def change_language(self, language):
     # via preferred language setting (not header)
-    # ActionChains(self.driver).move_to_element(self.language_selector).perform()
     self.language_selector.click()
     WDW(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'settings_en')))
-    #time.sleep(.4)
     try:
       if language.lower() == 'english':
         self.driver.find_element_by_class_name('settings_en').click()
@@ -193,7 +190,6 @@ class SettingsPage(Page):
       # couldn't find language options
       fail = 1 + "2"
     WDW(self.driver, 10).until_not(EC.presence_of_element_located((By.CLASS_NAME, 'settings_en')))
-    #time.sleep(2)
     self.load()
     return True
 

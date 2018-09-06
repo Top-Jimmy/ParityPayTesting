@@ -6,7 +6,6 @@ from selenium.common.exceptions import (TimeoutException, WebDriverException,
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from appium.webdriver.common.touch_action import TouchAction as TA
-from selenium.webdriver import ActionChains as AC
 
 class Page:
   __metaclass__ = abc.ABCMeta
@@ -117,10 +116,6 @@ class Page:
 
   def move_to_el(self, el, click=True):
     """Scroll until el is in view. Click unless click=False"""
-    # if main.is_desktop():
-    #     self.driver.execute_script("arguments[0].scrollIntoView();", el)
-    # else:
-    #     AC(self.driver).move_to_element(el).perform()
 
     # this seems to work better on Android web
     # move_to_element doesn't seem to handle the open keyboard very well

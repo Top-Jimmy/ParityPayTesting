@@ -38,8 +38,8 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
       desired_caps = {
         'platformName': 'Android',
         'platformVersion': '8.0',
-        'deviceName': 'Pixel_API_28', # 'Nexus_6',
-        'avd': 'Pixel_API_28', # 'Nexus_6',
+        'deviceName': 'Pixel_XL', # 'Nexus_6',
+        'avd': 'Pixel_XL', # 'Nexus_6',
         'app': app_path,
         'autoWebview': 'true',
         'autoGrantPermissions': 'true'
@@ -48,9 +48,9 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
       desired_caps = {
         'platformName': 'Android',
         'platformVersion': '8.0',
-        'deviceName': 'Pixel_API_28', # 'Nexus_6', # 
+        'deviceName': 'Pixel_XL', # 'Nexus_6', # 
         'browserName': 'Chrome',
-        'avd': 'Pixel_API_28', # 'Nexus_6', # 
+        'avd': 'Pixel_XL', # 'Nexus_6', # 
         'autoGrantPermissions': 'true',
         'automationName': 'UiAutomator2',
       }

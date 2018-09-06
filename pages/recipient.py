@@ -2,10 +2,11 @@ from page import Page
 from components import menu
 from components import header
 import main
+from navigation import NavigationFunctions as nav
+
 import time
 from selenium.common.exceptions import (NoSuchElementException,
   StaleElementReferenceException)
-from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -20,6 +21,7 @@ class RecipientPage(Page):
     # can't default to looking for hamburger because used for /select-recipient
     # and /recipients
     try:
+      self.nav = nav(self.driver)
       self.load_body()
       self.menu = menu.SideMenu(self.driver)
       self.header = header.PrivateHeader(self.driver)
@@ -98,14 +100,23 @@ class RecipientPage(Page):
       return False
     else:
       self.move_to_el(el)
-      # if main.is_desktop():
-      #     self.driver.execute_script("arguments[0].scrollIntoView();", el)
-      # else:
-      #     AC(self.driver).move_to_element(el).perform()
-      # el.click()
 
   def num_recipients(self):
     return len(self.recipients)
+
+  def edit_recipients(self, identifiers):
+    # Click recipients that don't contain anything in list of identifiers
+    # Return True if a recipient was edited. False if none were
+    for recipient in self.recipients:
+      text = recipient.find_elements_by_tag_name('div')[5].text
+      matchesIdentifier = False
+      for identifier in identifiers:
+        if identifier in text:
+          matchesIdentifier = True
+      if not matchesIdentifier:
+        # Click so we can delete it
+        self.nav.click_el(recipient)
+        return True
 
   def add_recipient(self):
     # ensure add button is visible on page

@@ -72,20 +72,23 @@ class TestATM(unittest.TestCase):
 		# Should get 'Required' error (not currently getting one for phone, no identifier on carrier)
 		send_to_atm.data_form.set_info(noCarrier) # Do noCarrier first (cannot de-select carrier)
 		send_to_atm.submit_data_form(False)
+		# raw_input('noCarrier')
 		self.assertTrue(send_to_atm.on([0, 'Recipient'], True))
 		# self.assertTrue('Date Format: mm/dd/yyyy' in send_to_atm.data_form.dob_error())
 		send_to_atm.data_form.set_info(noPhone)
 		send_to_atm.submit_data_form(False)
+		# raw_input('noPHone')
 		self.assertTrue(send_to_atm.on([0, 'Recipient'], True))
 		send_to_atm.data_form.set_info(noDOB)
+		# raw_input('noDob')
 		send_to_atm.submit_data_form(False)
 		self.assertTrue('Required' in send_to_atm.data_form.dob_error())
 
-		send_to_atm.data_form.set_info(info)
+		send_to_atm.data_form.set_info(allInfo)
 		returned_info = send_to_atm.data_form.get_info()
-		self.assertEqual(info['carrier'], returned_info['carrier'])
-		self.assertEqual(info['phone'], returned_info['phone'])
-		self.assertEqual(info['dob'], returned_info['dob'])
+		self.assertEqual(allInfo['carrier'], returned_info['carrier'])
+		self.assertEqual(allInfo['phone'], returned_info['phone'])
+		self.assertEqual(allInfo['dob'], returned_info['dob'])
 		send_to_atm.submit_data_form()
 
 		send_to_atm.set_step(0)
@@ -309,9 +312,9 @@ class TestATM(unittest.TestCase):
 		time.sleep(3)
 
 		# Action 2: FAQ
-		eHome.learn_more_action(2)
-		eHome.close_find_atm()
-		self.assertTrue(eHome.on('send'))
+		# eHome.learn_more_action(2)
+		# eHome.close_find_atm()
+		# self.assertTrue(eHome.on('send'))
 
 	def test_navigation(self):
 		"""SendToATM: ATM .               test_navigation"""

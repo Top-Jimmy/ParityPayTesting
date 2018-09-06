@@ -7,7 +7,7 @@ from components import menu
 from components import header
 import main
 import time
-from selenium.webdriver import ActionChains
+from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -100,6 +100,7 @@ class RecipientNamePage(Page):
 
   def set_location(self, country):
     # raw_input('about to set location')
+    time.sleep(.4)
     self.location.click()
     # raw_input('set location')
     WDW(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'menu-location')))
@@ -124,9 +125,9 @@ class RecipientNamePage(Page):
     if main.is_ios():
       el = self.location.find_element_by_tag_name('button')
     el.click()
-    ActionChains(self.driver).send_keys(country).perform()
+    AC(self.driver).send_keys(country).perform()
     time.sleep(.4)
-    ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+    AC(self.driver).send_keys(Keys.ENTER).perform()
     time.sleep(.4)
 
   def get_location(self):

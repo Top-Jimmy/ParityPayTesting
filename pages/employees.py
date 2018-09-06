@@ -8,7 +8,7 @@ from components import menu
 from components import header
 import main
 import time
-from selenium.webdriver import ActionChains
+from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -233,7 +233,7 @@ class EmployeePage(Page):
 		try:
 			emp_menu = emp.find_element_by_tag_name('button')
 			# move to emp. click toast (if visible)
-			ActionChains(self.driver).move_to_element(emp).perform()
+			AC(self.driver).move_to_element(emp).perform()
 			time.sleep(.2)
 			self.click_toast()
 			time.sleep(.2)
@@ -282,7 +282,7 @@ class EmployeePage(Page):
 	def select_remove_new_status(self, new_status):
 		self.remove_select.click()
 		time.sleep(1)
-		action = ActionChains(self.driver)
+		action = AC(self.driver)
 		action.send_keys(new_status)
 		action.send_keys(Keys.ENTER)
 		action.perform()

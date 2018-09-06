@@ -67,12 +67,11 @@ class EHomePage(Page):
 
 	def load_send_tab(self):
 		self.cards = self.driver.find_elements_by_class_name('card')
-		# self.cardNames = ['bank', 'atm', 'cashout']
+		self.card_titles = self.driver.find_elements_by_class_name('card-title')
 		self.cardNames = ['bank', 'atm']
 		self.send_to_bank = self.cards[0]
 		self.send_to_atm = self.cards[1]
 		self.learn_more = self.send_to_atm.find_element_by_class_name('atm_learn_more')
-		# self.send_to_cashout = self.cards[2]
 
 	def send(self, sendOption):
 		if not sendOption:
@@ -81,7 +80,15 @@ class EHomePage(Page):
 			self.setTab('send')
 
 		index = self.cardNames.index(sendOption)
-		self.cards[index].click()
+		if main.is_desktop():
+			# raw_input('about to click card: ' + str(sendOption))
+			self.cards[index].click()
+			# raw_input('clicked?')
+		else:
+			# iOS: Clicking card doesn't do anything for some reason
+			# raw_input('about to click card title: ' + str(sendOption))
+			self.card_titles[index].click()
+			# raw_input('clicked?')
 		# Should be new page (send-to-bank, send-to-atm, send-to-cashout)
 
 	def learn_more_action(self, action):

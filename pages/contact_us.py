@@ -6,7 +6,6 @@ from components import footer
 import time
 from selenium.common.exceptions import (NoSuchElementException,
 	StaleElementReferenceException)
-from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.common.keys import Keys
 
 class ContactPublicPage(Page):
@@ -30,7 +29,6 @@ class ContactPublicPage(Page):
 			return False
 
 	def set_invite_employer_email(self,email):
-		# AC(self.driver).move_to_element(self.invite_employer_input)
 		self.move_to_el(self.invite_employer_input)
 		self.invite_employer_input.clear()
 		self.invite_employer_input.send_keys(email)
@@ -41,8 +39,6 @@ class ContactPublicPage(Page):
 
 	def click_invite_employer_continue(self):
 		self.move_to_el(self.invite_employer_button)
-		# AC(self.driver).move_to_element(self.invite_employer_button)
-		# self.invite_employer_button.click()
 
 	def enter_invite_employer_email(self,email):
 		self.set_invite_employer_email(email)

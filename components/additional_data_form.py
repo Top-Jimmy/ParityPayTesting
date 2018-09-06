@@ -5,7 +5,6 @@ import main
 import time
 from component import Component
 from selenium.webdriver.common.keys import Keys
-# from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -51,11 +50,11 @@ class AddDataForm(Component):
 		if carrier:
 			self.load_carrier_input()
 			self.carrier_click.click()
-			WDW(self.driver, 3).until(EC.element_to_be_clickable(
+			WDW(self.driver, 5).until(EC.element_to_be_clickable(
 				(By.ID, 'carrier_01')))
 			self.try_load_carrier_dd()
 			self.carriers[carrier].click()
-			WDW(self.driver, 3).until(EC.invisibility_of_element_located(
+			WDW(self.driver, 5).until(EC.invisibility_of_element_located(
 				(By.ID, 'carrier_01')))
 		return True
 

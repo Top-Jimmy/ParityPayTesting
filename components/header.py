@@ -1,23 +1,25 @@
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
-import time
-import main
-from component import Component
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-
 from appium.webdriver.common.touch_action import TouchAction as TA
+
+import time
+import main
+from component import Component
+from navigation import NavigationFunctions
+
 
 class PubHeader(Component):
 	"""load content of element id='sendmi_public_appbar'"""
 
 	def __init__(self, driver):
 		self.driver = driver
+		self.nav = NavigationFunctions(self.driver)
 		self.load()
 
 	def load(self):
@@ -119,12 +121,7 @@ class PubHeader(Component):
 			# scrolled to top on desktop and we need to load other logo
 			logo = self.cont.find_element_by_id('public_logo')
 
-		# action = AC(self.driver)
-		# action.move_to_element(logo)
-		# action.perform()
-		# TA(self.driver).move_to(logo).perform()
-		AC(self.driver).move_to_element(logo).perform()
-		logo.click()
+		self.nav.click_el(logo)
 
 	'''def give_feedback(self, happiness, messsage):
 		self.scroll_to_top()
@@ -152,7 +149,7 @@ class PubHeader(Component):
 
 	def select_action(self, text):
 		# text: 'emp' (employers or employees), 'sign in', or 'signed in'
-		AC(self.driver).move_to_element(self.action_menu).perform()
+		self.nav.click_el(self.action_menu)
 		if self.action_menu != None:
 			if not self.action_menu_open():
 				self.action_menu.click()

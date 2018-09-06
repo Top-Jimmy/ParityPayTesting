@@ -419,7 +419,6 @@ class TestLogin(unittest.TestCase):
 	 'Test for native only')
 	def test_native_signin_success(self):
 		"""authentication : Login .            test_native signin success"""
-		# assert can login through footer 'Sign In' link
 		credentials = self.nicol.credentials
 		signin_page = self.nicol.signin_page
 		signin_code_page = self.nicol.signin_code_page

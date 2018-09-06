@@ -6,7 +6,7 @@ from page import Page
 from components import menu
 from components import header
 import time
-from selenium.webdriver import ActionChains
+from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -96,17 +96,17 @@ class RecipientAddressPage(Page):
     #   self.state_els[self.get_state_index(state)].click()
     #   # self.state_els[20].click()
     # else:
-    #   ActionChains(self.driver).send_keys(state).perform()
-    #   ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+    #   AC(self.driver).send_keys(state).perform()
+    #   AC(self.driver).send_keys(Keys.ENTER).perform()
     #WDW(self.driver, 10).until_not(EC.presence_of_element_located((By.CLASS_NAME, 'sm-state-menuitem')))
     time.sleep(1)
 
   # select state by typing keys, then pressing enter
   def type_state(self, state):
     self.state.click()
-    ActionChains(self.driver).send_keys(state).perform()
+    AC(self.driver).send_keys(state).perform()
     time.sleep(.4)
-    ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+    AC(self.driver).send_keys(Keys.ENTER).perform()
     time.sleep(.4)
 
   def try_load_state_els(self):

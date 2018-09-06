@@ -123,7 +123,11 @@ class TestBank(unittest.TestCase):
 		send_to_bank.set_dob(dob)
 
 		# Verify DOB is autofilled when trying to send to ATM
-		send_to_bank.menu.click_option('ehome')
+		# send_to_bank.menu.click_option('ehome')
+		send_to_bank.header.click_back()
+		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
+		send_to_bank.header.click_back()
+
 		self.assertTrue(eHome.on())
 		eHome.send('atm')
 		self.assertTrue(send_to_atm.on([0, 'Recipient']))
@@ -192,17 +196,23 @@ class TestBank(unittest.TestCase):
 		send_to_bank.click_account(recip_1, 0)
 		self.assertTrue(send_to_bank.on([1, 'Specify Amount']))
 
-		# Go to recipients and delete both
+		# Go to recipients and delete new recipient + any remaining from failed tests
 		send_to_bank.header.click_back()
 		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
 		send_to_bank.header.click_back()
 		self.assertTrue(eHome.on())
 		eHome.menu.click_option('recipients')
 		self.assertTrue(recipient_list.on())
-		recipient_list.click_recipient(recip_1)
-		self.assertTrue(recip_card.on())
-		recip_card.remove_recipient()
-		self.assertTrue(recipient_list.on())
+		# recipient_list.click_recipient(recip_1)
+		# self.assertTrue(recip_card.on())
+		# recip_card.remove_recipient()
+		# self.assertTrue(recipient_list.on())
+
+		# Delete non-Castillo/Ortega recipients
+		while recipient_list.edit_recipients(['Sandy Cheeks', 'Castillo', 'Ortega']):
+			self.assertTrue(recip_card.on())
+			recip_card.remove_recipient()
+			self.assertTrue(recipient_list.on())
 
 	def test_duplicate(self):
 		"""SendToBank: Bank .                             test_duplicate"""

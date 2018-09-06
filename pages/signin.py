@@ -54,17 +54,12 @@ class SigninPage(Page):
     self.email_input.click()
 
   def set_password(self, password):
-    '''if main.is_android():
-      raw_input('hiding keyboard')
-      self.try_hide_keyboard()'''
-    #self.move_to_el(self.pw_input)
     self.pw_input.clear()
     self.pw_input.send_keys(password)
     if main.is_ios():
       self.pw_input.click()
 
   def click_password_reset(self):
-    # AC(self.driver).move_to_element(self.reset_button).perform()
     if main.is_android(): # may need to close keyboard
       self.try_hide_keyboard()
     self.reset_button.click()

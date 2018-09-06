@@ -7,7 +7,7 @@ import time
 from selenium.common.exceptions import (NoSuchElementException,
 	StaleElementReferenceException, TimeoutException, WebDriverException)
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver import ActionChains
+from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -280,9 +280,9 @@ class BankAccountPage(Page):
 	# select country by typing keys, then selecting by pressing enter
 	def type_location(self, country):
 		self.current_location.click()
-		ActionChains(self.driver).send_keys(country).perform()
+		AC(self.driver).send_keys(country).perform()
 		time.sleep(.4)
-		ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+		AC(self.driver).send_keys(Keys.ENTER).perform()
 		time.sleep(.4)
 		self.load_body()
 

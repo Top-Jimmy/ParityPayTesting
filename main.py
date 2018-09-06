@@ -5,8 +5,8 @@
 # priority: Certain tests will skip depending on priority
 # cancel transactions: Will cancel pending transactions at end of send tests
 config = {
-  'env': 'desktop',
-  'browser': 'chrome',
+  'env': 'android',
+  'browser': 'web',
   'priority_level': 4,
   'cancel_transaction': True,
   'device_farm': False

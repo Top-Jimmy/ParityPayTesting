@@ -3,7 +3,6 @@ import main
 from selenium.common.exceptions import (NoSuchElementException,
 	WebDriverException, TimeoutException)
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver import ActionChains as AC
 from appium.webdriver.common.touch_action import TouchAction as TA
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -477,7 +476,6 @@ class SideMenu():
 				WDW(self.driver, 10).until(lambda x: not self.is_profile_loaded())
 			else: # Press escape
 				self.toggle_button.click()
-				#AC(self.driver).send_keys(Keys.ESCAPE).perform()
 
 	def is_drawer_visible(self, loading_page=False):
 		# this gets called a bunch of different places.
