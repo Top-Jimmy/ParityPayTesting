@@ -394,8 +394,10 @@ class SideMenu():
 			Mobile: 'open' or 'closed'"""
 		if main.is_desktop(): # desktop: 'open' or 'skinny'
 			# check val of 'd' attribute on button's <path>
-			wide = "M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
-			skinny = "M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
+			# wide = "M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
+			wide = "M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"
+			# skinny = "M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
+			skinny = "M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"
 
 			path_el = self.toggle_button.find_element_by_tag_name('path')
 			val = path_el.get_attribute('d')

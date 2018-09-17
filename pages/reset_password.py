@@ -1,14 +1,17 @@
 from selenium.common.exceptions import (NoSuchElementException,
   StaleElementReferenceException, WebDriverException)
 from selenium.webdriver.common.keys import Keys
-from page import Page
-import page
-import time
-import main
-from components import header
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+import time
+
+from page import Page
+import page
+import main
+from components import header
+from components import forgotPasswordForm
+
 
 class ResetPasswordPage(Page):
   url_tail = 'reset-password'
@@ -16,40 +19,15 @@ class ResetPasswordPage(Page):
 
   def load(self):
     try:
-      self.load_body()
+      self.forgotPWForm = forgotPasswordForm.ForgotPasswordForm(self.driver)
+      WDW(self.driver, 10).until(lambda x: self.forgotPWForm.load())
       self.header = header.PubHeader(self.driver)
       return True
     except (NoSuchElementException, StaleElementReferenceException) as e:
       return False
 
-  def load_body(self):
-    self.form = self.driver.find_element_by_class_name('resetPWForm') # self.load_form()
-    self.address_input = self.form.find_element_by_tag_name('input')
-    self.continue_button = self.form.find_element_by_class_name('primaryButton')
-    # Form should not have <a>. If it does, not on right page
-    # self.anchors = self.form.find_elements_by_tag_name('a')
-    # if len(self.anchors) > 0:
-    #   raise NoSuchElementException(
-    #     "Not on resetPassword. Should not have any <a> elements")
-
-  def load_form(self):
-    """On desktop ignore the 'sign in' button form"""
-
-    # *This won't work on home page* reset pw form is 1st form on desktop (in header dd)
-    if main.is_desktop():
-      return self.driver.find_elements_by_tag_name('form')[1]
-    return self.driver.find_element_by_tag_name('form')
-
-  def set_email(self, address):
-    self.address_input.clear()
-    self.address_input.send_keys(address)
-    if main.is_ios():
-      # self.address_input.click()
-      self.address_input.send_keys('')
-    # Wait for continue button to enable
-
-  def click_continue(self):
-    self.continue_button.click()
+  def submit(self, email='', submit=True):
+    self.forgotPWForm.submit(email, submit)
 
 class ResetPasswordCodePage(Page):
   url_tail = 'reset-password/code'
@@ -75,10 +53,9 @@ class ResetPasswordCodePage(Page):
         self.form.find_element_by_class_name('primaryButton'))
 
   def load_form(self):
-    """On desktop ignore the 'sign in' button form"""
-    if main.is_desktop():
-      return self.driver.find_elements_by_tag_name('form')[1]
-    return self.driver.find_element_by_tag_name('form')
+    # Desktop: Sign In Form is only visible while open. Just return last form
+    forms = self.driver.find_elements_by_tag_name('form') 
+    return forms[-1]
 
   def click_wrong_link(self):
     if not main.is_desktop(): # this works for android web, not sure about native.
@@ -152,10 +129,9 @@ class ResetPasswordNewPage(Page):
     self.continue_button = self.form.find_element_by_class_name('primaryButton')
 
   def load_form(self):
-    """On desktop ignore the 'sign in' button form"""
-    if main.is_desktop():
-      return self.driver.find_elements_by_tag_name('form')[1]
-    return self.driver.find_element_by_tag_name('form')
+    # Desktop: Sign In Form is only visible while open. Just return last form
+    forms = self.driver.find_elements_by_tag_name('form') 
+    return forms[-1]
 
   def set_password(self, password):
     self.password_input.click()

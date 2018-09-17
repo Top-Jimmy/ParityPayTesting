@@ -65,7 +65,7 @@ class TestATM(unittest.TestCase):
 		}
 		allInfo = {
 			'carrier': 'movistar',
-			'phone': '2022221234',
+			'phone': '(202) 222-1234',
 			'dob': self.cheeks.generate_rfc_dob()
 		}
 		# Shouldn't be able to submit form w/out all info

@@ -48,8 +48,9 @@ class TestContactFlow(unittest.TestCase):
 		for_employees.enter_contact_email(credentials['email'])
 
 		self.assertTrue(map_page.on())
-		map_page.add('Nintendo of America WA')
+		map_page.add('Nintendo of America 98052')
 
+		raw_input('?')
 		self.assertTrue(form_page.on())
 		form_page.set_name('Test Request')
 		invalid_phones = ['1234567890', '801123456']
@@ -83,7 +84,7 @@ class TestContactFlow(unittest.TestCase):
 		for_employees.enter_contact_email(credentials['email'])
 
 		self.assertTrue(map_page.on())
-		map_page.add('Nintendo of America WA')
+		map_page.add('Nintendo of America 98052')
 
 		self.assertTrue(form_page.on())
 		self.assertFalse(form_page.continue_button.is_enabled())
@@ -235,12 +236,19 @@ class TestForEmployees(unittest.TestCase):
 		# sign in/forgot pw
 		if main.is_desktop():
 			self.assertFalse(for_employees.header.sign_in_open())
-			for_employees.header.click_login()
-			for_employees.header.set_sign_in_email('asdf')
-			for_employees.header.set_sign_in_pw('asdf2')
-			for_employees.header.click_forgot_pw()
-			for_employees.header.set_forgot_input('7774563334')
-			for_employees.header.click_forgot_continue()
+			# for_employees.header.click_login()
+			for_employees.header.sign_in_submit('', '')
+
+
+			# for_employees.header.set_sign_in_email('asdf')
+			# for_employees.header.set_sign_in_pw('asdf2')
+			for_employees.header.sign_in_submit('asdf', 'asdf2', False)
+
+			# for_employees.header.click_forgot_pw()
+			# for_employees.header.set_forgot_input('7774563334')
+			# for_employees.header.click_forgot_continue()
+			for_employees.header.forgot_password_submit('7774563334')
+			
 		else:
 			self.assertTrue(for_employees.header.select_action("sign in"))
 			self.assertTrue(signin_page.on())
@@ -625,7 +633,7 @@ class TestForEmployers(unittest.TestCase):
 		accept_page.click_continue('employer')
 
 		self.assertTrue(add_page.on())
-		add_page.add('Nintendo of America WA')
+		add_page.add('Nintendo of America 98052')
 
 		self.assertTrue(prefilled_page.on())
 		prefilled_page.set('ein', ein)

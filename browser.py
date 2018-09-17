@@ -9,7 +9,7 @@ import main
 
 def get_url(env, device_farm):
   if env == 'desktop':
-    return 'http://127.0.0.1:5050/wd/hub'
+    return 'http://127.0.0.1:5051/wd/hub'
   elif device_farm:
     # AWS Device Farm:
     return 'http://localhost:4723/wd/hub'
@@ -33,13 +33,12 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
       #   'testobject_appium_version': '1.5.2-patched-chromedriver'
       # }
     elif browser == 'native':
-      app_path = '/Users/andrewtidd/ppay10/cordova/platforms/android/build/outputs/apk/android-debug.apk'
-      # app_path = 'C:/Users/Jeff/Desktop/virtualenvs/android-debug.apk'
+      app_path = '/Users/andrewtidd/Desktop/ppay10/cordova/platforms/android/build/outputs/apk/android-debug.apk'
       desired_caps = {
         'platformName': 'Android',
         'platformVersion': '8.0',
-        'deviceName': 'Pixel_XL', # 'Nexus_6',
-        'avd': 'Pixel_XL', # 'Nexus_6',
+        'deviceName': 'Pixel_2_XL',
+        'avd': 'Pixel_2_XL',
         'app': app_path,
         'autoWebview': 'true',
         'autoGrantPermissions': 'true'
@@ -48,15 +47,15 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
       desired_caps = {
         'platformName': 'Android',
         'platformVersion': '8.0',
-        'deviceName': 'Pixel_XL', # 'Nexus_6', # 
+        'deviceName': 'Pixel_2_XL',
         'browserName': 'Chrome',
-        'avd': 'Pixel_XL', # 'Nexus_6', # 
+        'avd': 'Pixel_2_XL',
         'autoGrantPermissions': 'true',
         'automationName': 'UiAutomator2',
       }
   elif env == 'ios':
     if browser == 'native':
-      app_path = '/Users/andrewtidd/ppay10/cordova/platforms/ios/build/emulator/sendmi.app'
+      app_path = '/Users/andrewtidd/Desktop/ppay10/cordova/platforms/ios/build/emulator/sendmi.app'
       desired_caps = {
         'platformName': 'iOS',
         'platformVersion': '11.4',

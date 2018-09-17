@@ -1,12 +1,13 @@
 from page import Page
-from selenium.common.exceptions import (NoSuchElementException,
-	StaleElementReferenceException)
-from selenium.webdriver.support.ui import WebDriverWait
-from appium.webdriver.common.touch_action import TouchAction as TA
-from selenium.webdriver.common.keys import Keys
 import main
 from components import header
+
 import time
+from selenium.common.exceptions import (NoSuchElementException,
+	StaleElementReferenceException, TimeoutException)
+# from selenium.webdriver.support.ui import WebDriverWait
+from appium.webdriver.common.touch_action import TouchAction as TA
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait as WDW
@@ -131,15 +132,15 @@ class ContactFormPage(Page):
 		self.name_input = find_by('input')[0]
 		self.phone_input = find_by('input')[1]
 		self.comment = find_by('textarea')
-		# self.continue_button = (
-		# 	find_class('primaryButton').find_element_by_tag_name('button'))
 		self.continue_button = find_class('primaryButton')
 
 	def load_form(self):
 		# on desktop ignore 'sign in' dropdown form
 		if main.is_desktop():
+			# Sign In dropdown probably only exists when it's displayed.
+			# Probably need to check how many forms there are
 			print('got 2nd form')
-			return self.driver.find_elements_by_tag_name('form')[1]
+			return self.driver.find_elements_by_tag_name('form')[-1]
 		return self.driver.find_element_by_tag_name('form')
 
 	def set_name(self,name):

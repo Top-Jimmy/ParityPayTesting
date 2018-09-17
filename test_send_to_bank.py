@@ -13,7 +13,7 @@ import messages
 	# test_duplicate
 	# test_navigation
 	# test_no_balance
-	# test_success
+	# test_us_success
 
 class TestBank(unittest.TestCase):
 	def setUp(self):

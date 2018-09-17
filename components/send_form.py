@@ -1,19 +1,22 @@
 from selenium.common.exceptions import (NoSuchElementException,
 	StaleElementReferenceException, WebDriverException, TimeoutException)
-from decimal import *
-import main
-import time
-from component import Component
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from decimal import *
+import time
+
+from navigation import NavigationFunctions
+from component import Component
+import main
 
 class SendForm(Component):
 
 	def __init__(self, driver):
 		self.driver = driver
+		self.nav = NavigationFunctions(self.driver)
 		self.load()
 
 	def load(self):
@@ -308,9 +311,10 @@ class SendForm(Component):
 		# Seems to change sometimes. Last updated 11/29
 		try:
 			self.error = (
-				self.form.find_element_by_class_name('alert-dismissable'))
+				self.form.find_element_by_class_name('alert-danger'))
 			self.error_button = self.error.find_element_by_tag_name('button')
-			if self.error.text[14:] == 'You have no money to send.':
+			error_p = self.error.find_element_by_tag_name('p')
+			if self.nav.get_text(error_p) == 'You have no money to send.':
 				return True
 		except NoSuchElementException:
 			pass

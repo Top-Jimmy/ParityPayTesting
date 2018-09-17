@@ -41,7 +41,7 @@ class TestForgotPassword(unittest.TestCase):
 	# @unittest.skipIf(main.get_priority() < 3)
 	@unittest.skip("S3 - Email input validation. Bug #145647407")
 	def test_invalid_inputs(self):
-		"""authentication : Forgot Password .           test_invalid inputs"""
+		""" test_authentication.py:TestForgotPassword.test_invalid_inputs """
 		# assert inputs on 'Reset Password' page handle invalid credentials
 
 		credentials = self.nicol.credentials
@@ -60,8 +60,7 @@ class TestForgotPassword(unittest.TestCase):
 		invalid_emails = ['invalid', 'invalid@', 'invalid.com','invalid@examplec.om']
 		error = "Invalid email address"
 		for email in invalid_emails:
-			reset_page.set_email(email)
-			reset_page.click_continue()
+			reset_page.submit(email)
 			time.sleep(.8)
 			self.assertEqual(   # /reset-password validation fails
 				1, reset_page.number_of_elements('div', error)) #Failed 6/6 3:49pm Accepts invalid inputs. Logged.
@@ -70,8 +69,7 @@ class TestForgotPassword(unittest.TestCase):
 			error = (
 				"\"{phone}\" is not a valid phone number in the United States."
 			)
-			reset_page.set_email(phone)
-			reset_page.click_reset_password()
+			reset_page.submit(email)
 			time.sleep(.8)
 			self.assertEqual(1, reset_page.number_of_elements(
 				'div', error.format(phone=phone)))
@@ -146,7 +144,7 @@ class TestForgotPassword(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 3, "Priority = 3")
 	def test_required_fields(self):
-		"""authentication : Forgot Password .          test_required fields"""
+		""" test_authentication.py:TestForgotPassword.test_required_fields """
 		# assert inputs on 'Reset Password' page are required as expected
 		# Sometimes creates test-specific sendmi error message. Hits backend wierd?
 		credentials = self.nicol.credentials
@@ -165,17 +163,17 @@ class TestForgotPassword(unittest.TestCase):
 			self.assertTrue(reset_page.on())
 
 		self.assertTrue(reset_page.on())
-		reset_page.click_continue()
+		reset_page.submit('')
 		tag = 'p'
 		error = "Required"
 		error_count = reset_page.number_of_elements
 		self.assertEqual(1, error_count(tag, error))
-		reset_page.set_email('notanemail@none.com')
+		# reset_page.set_email('notanemail@none.com')
+		reset_page.submit('notanemail@none.com', False)
 		# iOS: Sending keys does not remove 'required' error
 		if not main.is_ios():
 			self.assertEqual(0, error_count(tag, error))
-		reset_page.set_email(credentials['email'])
-		reset_page.click_continue()
+		reset_page.submit(credentials['email'])
 
 		self.assertTrue(code_page.on())
 		code_page.enter_code()
@@ -198,7 +196,7 @@ class TestForgotPassword(unittest.TestCase):
 		self.assertTrue(lobby_page.on())
 
 	def test_success(self):
-		"""authentication : Forgot Password .                 test_success"""
+		""" test_authentication.py:TestForgotPassword.test_success """
 		# assert "Forgot Password" functionality works as expected
 		credentials = self.alone1.credentials
 		reset_page = self.alone1.reset_password_page
@@ -219,8 +217,7 @@ class TestForgotPassword(unittest.TestCase):
 			self.assertTrue(reset_page.on())
 
 		self.assertTrue(reset_page.on())
-		reset_page.set_email(credentials["email"])
-		reset_page.click_continue()
+		reset_page.submit(credentials['email'])
 		self.assertTrue(code_page.on())
 		code_page.enter_code()
 		self.assertTrue(code_page.on())
@@ -263,7 +260,7 @@ class TestLogin(unittest.TestCase):
 	@unittest.skipIf(not main.is_web() or main.is_desktop() or main.get_priority() < 2,
 		'Only get action menu on mobile web')
 	def test_action_success(self):
-		"""authentication : Login .                    test_action success"""
+		""" test_authentication.py:TestLogin.test_action_success """
 		# assert user can login through action menu
 		credentials = self.nicol.credentials
 		for_employers = self.nicol.for_employers
@@ -288,7 +285,7 @@ class TestLogin(unittest.TestCase):
 	@unittest.skipIf(not main.is_desktop() or main.get_priority() < 2,
 		'Signin dropdown only on desktop')
 	def test_dropdown_success(self):
-		"""authentication : Login .                  test_dropdown success"""
+		""" test_authentication.py:TestLogin.test_dropdown_success """
 		# assert can login through signin dropdown
 		credentials = self.nicol.credentials
 		for_employers = self.nicol.for_employers
@@ -297,9 +294,7 @@ class TestLogin(unittest.TestCase):
 
 		for_employers.go()
 		self.assertTrue(for_employers.on())
-		for_employers.header.set_sign_in_email(credentials['email'])
-		for_employers.header.set_sign_in_pw(credentials['password'])
-		for_employers.header.click_login()
+		for_employers.header.sign_in_submit(credentials['email'], credentials['password'])
 
 		self.assertTrue(signin_code_page.on())
 		signin_code_page.enter_code()
@@ -311,7 +306,7 @@ class TestLogin(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 3, "Priority = 3")
 	def test_invalid_credentials(self):
-		"""authentication : Login .              test_invalid credentials"""
+		""" test_authentication.py:TestLogin.test_invalid_credentials """
 		# assert 'Sign In' page inputs properly handle invalid credentials
 		credentials = self.nicol.credentials
 		signin_page = self.nicol.signin_page
@@ -321,27 +316,24 @@ class TestLogin(unittest.TestCase):
 		else:
 			self.assertTrue(signin_page.on())
 
-		signin_page.set_email(credentials['email'])
-		signin_page.set_password(credentials['password'] + '0')
-		signin_page.click_login()
-		self.WDWait.until(EC.presence_of_element_located((By.ID, 'sendmi_error')))
+		signin_page.submit(credentials['email'], credentials['password'] + '0')
+		# self.WDWait.until(EC.presence_of_element_located((By.ID, 'sendmi_error')))
+		self.WDWait.until(EC.presence_of_element_located((By.CLASS_NAME, 'alert-danger')))
 		error = "Incorrect password, email address, or phone number."
 		self.assertTrue(error in signin_page.read_error())
 
-		signin_page.set_email('abc' + credentials['email'])
-		signin_page.set_password(credentials['password'])
-		signin_page.click_login()
-		self.WDWait.until(EC.presence_of_element_located((By.ID, 'sendmi_error')))
+		signin_page.submit('abc' + credentials['email'], credentials['password'])
+		# self.WDWait.until(EC.presence_of_element_located((By.ID, 'sendmi_error')))
+		self.WDWait.until(EC.presence_of_element_located((By.CLASS_NAME, 'alert-danger')))
 		self.assertTrue(error in signin_page.read_error())
 
 	@unittest.skipIf(main.get_priority() < 3, "Priority = 3")
 	def test_invalid_inputs(self):
-		"""authentication : Login .                    test_invalid inputs"""
+		""" test_authentication.py:TestLogin.test_invalid_inputs """
 		# Running this test > once might put your computer out of commission for
 		# 15 minutes because it thinks you're trying to hack into accounts
 
 		# assert 'Sign In' page handles invalid input as expected
-		#Needs
 		credentials = self.nicol.credentials
 		signin_page = self.nicol.signin_page
 
@@ -349,7 +341,8 @@ class TestLogin(unittest.TestCase):
 			self.assertTrue(signin_page.on())
 		else:
 			signin_page.go()
-		signin_page.set_password(credentials['password'])
+		# signin_page.set_password(credentials['password'])
+		signin_page.submit('', credentials['password'], False)
 		invalid_emails = ['invalid', 'invalid@', 'invalid.com']
 
 		containers = ["div","p","div"]
@@ -363,8 +356,7 @@ class TestLogin(unittest.TestCase):
 		# 	"Incorrect password, email address, or phone number."
 		# ]
 		for i, email in enumerate(invalid_emails):
-			signin_page.set_email(email)
-			signin_page.click_login()
+			signin_page.submit(invalid_emails[i], credentials['password'])
 			signin_page.check_captcha()
 
 			# Wait for errors to show up
@@ -378,17 +370,17 @@ class TestLogin(unittest.TestCase):
 				# 		errors[i]))
 			else: # form error
 				print('i= ' + str(i))
-				self.WDWait.until(
-					EC.text_to_be_present_in_element((By.ID, 'sendmi_error'),
-						error))
+				# self.WDWait.until(
+					# EC.text_to_be_present_in_element((By.ID, 'sendmi_error'), error))
+				self.WDWait.until(EC.presence_of_element_located((By.CLASS_NAME, 'alert-danger')))
 
 				self.assertEqual(1, signin_page.number_of_elements('span', error))
 
 		invalid_phones = ['1234567890', '801123456']
 		for phone in invalid_phones:
 			error = "Please enter a valid email address, mobile phone number, or username."
-			signin_page.set_email(phone)
-			signin_page.click_login()
+
+			signin_page.submit(phone, credentials['password'])
 
 			# Validation changed on form at some point 4/10/2018
 			# Fails to submit, but no error.
@@ -400,7 +392,7 @@ class TestLogin(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_logout_success(self):
-		"""authentication : Login .                   test_logout success"""
+		""" test_authentication.py:TestLogin.test_logout_success """
 		# assert menu 'Sign Out' works as expected
 		credentials = self.nicol.credentials
 		for_employers = self.nicol.for_employers
@@ -418,7 +410,7 @@ class TestLogin(unittest.TestCase):
 	@unittest.skipIf(main.is_web() or main.get_priority() < 2,
 	 'Test for native only')
 	def test_native_signin_success(self):
-		"""authentication : Login .            test_native signin success"""
+		""" test_authentication.py:TestLogin.test_native_signin_success """
 		credentials = self.nicol.credentials
 		signin_page = self.nicol.signin_page
 		signin_code_page = self.nicol.signin_code_page
@@ -434,7 +426,7 @@ class TestLogin(unittest.TestCase):
 	# Form validation changed at some point and none of these errors show up anymore
 	@unittest.skip("Validation removed on signin form")
 	def test_required_fields(self):
-		"""authentication : Login .                 test_required fields"""
+		""" test_authentication.py:TestLogin.test_required_fields """
 		# assert 'Sign In' page inputs are required as expected
 		credentials = self.nicol.credentials
 		signin_page = self.nicol.signin_page
@@ -467,7 +459,7 @@ class TestLogin(unittest.TestCase):
 	@unittest.skipIf(not main.is_web() or main.get_priority() < 2,
 	 'Test for web only')
 	def test_signin_success(self):
-		"""authentication : Login .                    test_signin success"""
+		""" test_authentication.py:TestLogin.test_signin_success """
 		# assert can login through footer 'Sign In' link
 		credentials = self.nicol.credentials
 		for_employers = self.nicol.for_employers
@@ -481,9 +473,7 @@ class TestLogin(unittest.TestCase):
 
 		self.assertTrue(signin_page.on())
 		self.assertTrue(signin_page.is_public())
-		signin_page.set_email(credentials['email'])
-		signin_page.set_password(credentials['password'])
-		signin_page.click_login()
+		signin_page.submit(credentials['email'], credentials['password'])
 
 		self.assertTrue(signin_code_page.on())
 		self.assertTrue(signin_code_page.is_public())
@@ -500,7 +490,7 @@ class TestRemember(unittest.TestCase):
 
 	# @unittest.skipIf(not main.is_web(), 'For web only')
 	def test_remember_me(self):
-		"""authentication : Remember .                    test_remember_me"""
+		""" test_authentication.py:TestRemember.test_remember_me """
 		# Web: Remember me functionality works as expected
 		# Native: Remember me functionality works automatically
 		credentials = self.nicol.credentials
@@ -517,9 +507,7 @@ class TestRemember(unittest.TestCase):
 
 		self.assertTrue(signin_page.on())
 		self.assertTrue(signin_page.is_public())
-		signin_page.set_email(credentials['email'])
-		signin_page.set_password(credentials['password'])
-		signin_page.click_login()
+		signin_page.submit(credentials['email'], credentials['password'])
 
 		self.assertTrue(signin_code_page.on())
 		self.assertTrue(signin_code_page.is_public())
@@ -538,8 +526,6 @@ class TestRemember(unittest.TestCase):
 			for_employers.footer.click_link('sign in')
 		self.assertTrue(signin_page.on())
 		self.assertTrue(signin_page.is_public())
-		signin_page.set_email(credentials['email'])
-		signin_page.set_password(credentials['password'])
-		signin_page.click_login()
+		signin_page.submit(credentials['email'], credentials['password'])
 
 		self.assertTrue(lobby_page.on())

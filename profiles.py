@@ -129,22 +129,19 @@ class Profile:
         password = self.credentials['password']
       if email is None:
         email = self.credentials['email']
-      self.signin_page.authenticate(email, password)
+      self.signin_page.submit(email, password)
     else:
       # Couldn't loading signin page
       raise Exception(messages.login_signin)
 
-    # try and load signin confirmation page. Enter code if page loads
-    check_for_error = False
+    # Wait for Sign In Screen to disappear
     try:
-      WDW(self.driver, 10).until(lambda x: self.signin_code_page.load())
-      self.signin_code_page.enter_code()
+      WDW(self.driver, 5).until_not(EC.presence_of_element_located((By.ID, 'signin_form_user')))
     except TimeoutException:
-      # signin confirmation didn't load
-      check_for_error = True
+      # Something went wrong on Sign In page
+      print('Login: Never left Sign In page')
 
-    # Signin Code page didn't load. Wrong password?
-    if check_for_error:
+      print('Login: Looking for Sign In error')
       try:
         WDW(driver, 4).until(
           EC.presence_of_element_located((By.ID, 'sendmi_error')))
@@ -156,10 +153,12 @@ class Profile:
       except (TimeoutException, NoSuchElementException) as e:
         # No password error.
         # Captcha checkbox from too many failed login attempts?
+        print('Login: No Sign In error. Checking for captcha')
         if self.signin_page.check_captcha():
+          print('Login: Found and handled captcha')
           # had too many failed login attempts. Should be on code page now
-          WDW(self.driver, 10).until(lambda x: self.signin_code_page.load())
-          self.signin_code_page.enter_code()
+          # WDW(self.driver, 10).until(lambda x: self.signin_code_page.load())
+          # self.signin_code_page.enter_code()
         else:
           # No captcha checkbox. Check if user was remembered and code page was skipped
           try:
@@ -169,6 +168,40 @@ class Profile:
             # Couldn't find header. White screen?
             raise TimeoutException("Login: Whitescreen?")
 
+    # try and load signin confirmation page. Enter code if page loads
+    check_for_error = False
+    try:
+      WDW(self.driver, 10).until(lambda x: self.signin_code_page.load())
+      self.signin_code_page.enter_code()
+    except TimeoutException:
+      # signin confirmation didn't load
+      check_for_error = True
+
+    # Signin Code page didn't load. Wrong password?
+    # if check_for_error:
+    #   try:
+    #     WDW(driver, 4).until(
+    #       EC.presence_of_element_located((By.ID, 'sendmi_error')))
+    #     error = self.driver.find_element_by_id('sendmi_error')
+    #     # probably has password error
+    #     print(error.text)
+    #     print(messages.login_error)
+    #     raise Exception(messages.login_error)
+    #   except (TimeoutException, NoSuchElementException) as e:
+    #     # No password error.
+    #     # Captcha checkbox from too many failed login attempts?
+    #     if self.signin_page.check_captcha():
+    #       # had too many failed login attempts. Should be on code page now
+    #       WDW(self.driver, 10).until(lambda x: self.signin_code_page.load())
+    #       self.signin_code_page.enter_code()
+    #     else:
+    #       # No captcha checkbox. Check if user was remembered and code page was skipped
+    #       try:
+    #         WDW(driver, 8).until(
+    #           EC.presence_of_element_located((By.ID, 'sendmi_appbar')))
+    #       except TimeoutException:
+    #         # Couldn't find header. White screen?
+    #         raise TimeoutException("Login: Whitescreen?")
 
     # Should be logged in. Wait for an authenticated page to load
     try:
@@ -184,28 +217,6 @@ class Profile:
       print(msg)
       raise Exception(msg)
     return False
-
-  # def nav_splash_screens(self):
-  #   """Navigate through 2 splash pages and load signin page"""
-  #   self.native_splash_page.on()
-  #   self.native_splash_page.click_next()
-  #   self.native_splash_page2.on()
-  #   self.native_splash_page2.click_next()
-  #   self.signin_page.load()
-
-  # def env_loaded(self):
-  #   # native apps: wait until booted up and can find el on splash screen
-  #   if not main.is_web():
-  #     presence = EC.presence_of_element_located
-  #     try:
-  #       el_id = 'nextButton'
-  #       el = WDW(self.driver,15).until(presence((By.ID, el_id)))
-  #       if main.is_ios():
-  #         time.sleep(2)
-  #     except TimeoutException:
-  #       return False
-
-  #   return True
 
   def generate_name(self, surname=True):
     name = [None]*3

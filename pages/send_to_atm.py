@@ -1,6 +1,11 @@
 from selenium.common.exceptions import (NoSuchElementException,
 	StaleElementReferenceException, WebDriverException)
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait as WDW
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+import time
+
 from components import menu
 from page import Page
 from components import header
@@ -8,11 +13,8 @@ from components import stepper
 from components import send_form
 from components import disclosure
 from components import additional_data_form
-import time
 import main
-from selenium.webdriver.support.wait import WebDriverWait as WDW
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+
 
 
 class SendToATMPage(Page):

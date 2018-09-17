@@ -6,7 +6,7 @@
 # cancel transactions: Will cancel pending transactions at end of send tests
 config = {
   'env': 'android',
-  'browser': 'web',
+  'browser': 'native',
   'priority_level': 4,
   'cancel_transaction': True,
   'device_farm': False
@@ -15,9 +15,9 @@ config = {
 # base_url = 'http://localtest.sendmi.com:3000/'
 base_url =  "https://test.sendmi.com/"   # google test server
 if config['browser'] is 'native':
-  version = 'V 1.0.38'
+  version = 'V 1.1.0'
 else:
-  version = 'V 1.0.38'
+  version = 'V 1.1.0'
 
 def get_env():
   return config['env'].lower()

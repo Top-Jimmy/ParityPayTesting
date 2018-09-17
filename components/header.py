@@ -11,6 +11,8 @@ from appium.webdriver.common.touch_action import TouchAction as TA
 import time
 import main
 from component import Component
+from signInForm import SignInForm
+from forgotPasswordForm import ForgotPasswordForm
 from navigation import NavigationFunctions
 
 
@@ -23,49 +25,63 @@ class PubHeader(Component):
 		self.load()
 
 	def load(self):
-		self.cont = self.driver.find_element_by_id('sendmi_public_appbar')
+		# self.cont = self.driver.find_element_by_id('sendmi_public_appbar')
+		headers = self.driver.find_elements_by_tag_name('header')
+		self.cont = headers[0]
+		if len(headers) > 1:
+			raw_input('page has more than 1 header element')
 		find_by = self.cont.find_element_by_id
 
 		# all environments *ignoring hybrid app (no homepage on hybrid)
-		self.logo = find_by('public_logo_sm')
+		# self.logo = find_by('public_logo_sm')
+		self.logo = find_by('public_logo')
 		self.language_dd = find_by('locale_dropdown')
-		self.english = find_by('locale_en')
-		self.spanish = find_by('locale_es')
+		# Only there when language dropdown is open
+		# self.english = find_by('locale_en')
+		# self.spanish = find_by('locale_es')
 
 		self.pre_signed_in = self.load_pre_sign_in()
 		# desktop only
 		if main.is_desktop():
-			self.load_sign_in_dd()
-		# forgot pw form loads when 'forgot' link clicked
+			# signin dropdown only on desktop when not signed in
+			# never on signin or signin/code
+			# Contents of dropdown do not exist when dropdown is closed
+			try:
+				self.sign_in_button = (
+					self.cont.find_element_by_id('signin_dropdown'))
+			except NoSuchElementException:
+				self.sign_in_button = None
 
+		# forgot pw form loads when 'forgot' link clicked
 		self.for_employers = self.load_employers_link()
 		self.for_employees = self.load_employees_link()
 
 		# mobile web only
 		self.load_action_menu()
 
-	def load_sign_in_dd(self):
-		# signin dropdown only on desktop when not signed in
-		# never on signin or signin/code
-		if not self.signed_in():
-			try:
-				self.sign_in_button = (
-					self.cont.find_element_by_id('signin_dropdown'))
-				self.signin_form = self.cont.find_element_by_id('signin_form_id')
-				find_by = self.signin_form.find_element_by_id
-				self.sign_in_email = find_by('signin_form_user')
-				self.sign_in_pw = find_by('signin_form_pw')
-				self.sign_in_forgot_pw = find_by('forgot_password')
-				self.sign_in_continue = find_by('submit_si_button')
-				return
-			except NoSuchElementException:
-				pass
-		self.sign_in_button = None
-		self.signin_form = None
-		self.sign_in_email = None
-		self.sign_in_pw = None
-		self.sign_in_forgot_pw = None
-		self.sign_in_continue = None
+	# def load_sign_in_dd(self):
+	# 	# signin dropdown only on desktop when not signed in
+	# 	# never on signin or signin/code
+	# 	# Contents of dropdown do not exist when dropdown is closed
+	# 	if not self.signed_in():
+	# 		try:
+	# 			self.sign_in_button = (
+	# 				self.cont.find_element_by_id('signin_dropdown'))
+	# 			self.signin_form = self.cont.find_element_by_id('signin_form_id')
+	# 			find_by = self.signin_form.find_element_by_id
+	# 			self.sign_in_email = find_by('signin_form_user')
+	# 			self.sign_in_pw = find_by('signin_form_pw')
+	# 			self.sign_in_forgot_pw = find_by('forgot_password')
+	# 			self.sign_in_continue = find_by('submit_si_button')
+	# 			return
+	# 		except NoSuchElementException:
+	# 			pass
+	# 	self.sign_in_button = None
+	# 	self.signin_form = None
+	# 	self.sign_in_email = None
+	# 	self.sign_in_pw = None
+	# 	self.sign_in_forgot_pw = None
+	# 	self.sign_in_continue = None
 
 	def load_pre_sign_in(self):
 		# Desktop: item in header
@@ -123,17 +139,6 @@ class PubHeader(Component):
 
 		self.nav.click_el(logo)
 
-	'''def give_feedback(self, happiness, messsage):
-		self.scroll_to_top()
-		self.feedback.click()
-		WDW(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'subbutkey')))
-		#time.sleep(1)
-		self.load_feedback_form(happiness, message)'''
-	# Authenticated-user only functionality
-
-	def load_feedback_form(self):
-		pass
-
 	def click_for_employers(self):
 		if self.for_employers != None:
 			self.for_employers.click()
@@ -178,58 +183,102 @@ class PubHeader(Component):
 			return True
 		return False
 
+	def sign_in_submit(self, email='', password='', submit=True):
+		# No sign in dropdown on mobile
+		if main.is_desktop():
+			# Make sure dropdown is visible (won't have dropdown on signin page)
+			if self.sign_in_button:
+				if not self.sign_in_open():
+					self.nav.click_el(self.sign_in_button)
+
+				self.signInForm = SignInForm(self.driver)
+				WDW(self.driver, 10).until(lambda x: self.signInForm.load())
+				self.signInForm.submit(email, password, submit)
+
+	def forgot_password_submit(self, email='', submit=True):
+		# No forgor password dropdown on mobile
+		if main.is_desktop():
+			# Neither dropdowns are visible
+			if not self.forgot_password_open() and not self.sign_in_open():
+				self.nav.click_el(self.sign_in_button)
+				self.signInForm = SignInForm(self.driver)
+
+			# Sign In form is visible
+			if self.sign_in_open():
+				WDW(self.driver, 10).until(lambda x: self.signInForm.load())
+				self.signInForm.forgot_password()
+
+			# Should be on forgotPWForm
+			self.forgotPWForm = ForgotPasswordForm(self.driver)
+			WDW(self.driver, 10).until(lambda x: self.forgotPWForm.load())
+			self.forgotPWForm.submit(email, submit)
+
 	def sign_in_open(self):
 		# is signin dropdown open?
-		if main.is_desktop():
-			el = self.sign_in_forgot_pw
-			if el is not None and el.is_displayed():
-				return True
+		if main.is_desktop() and self.sign_in_button:
+			try:
+				el = self.driver.find_element_by_id('forgot_password')
+				if el.is_displayed():
+					return True
+			except NoSuchElementException:
+				pass
 		return False
 
-	def click_sign_in(self):
-		self.sign_in_button.click()
+	def forgot_password_open(self):
+		# Is forgot password form visible?
+		if main.is_desktop() and self.sign_in_button:
+			try:
+				resetPWform = self.driver.find_element_by_class_name('resetPWForm')
+				if resetPWform.is_displayed():
+					return True
+			except NoSuchElementException:
+				pass
+		return False
 
-	def set_sign_in_email(self,email):
-		if not self.sign_in_open():
-			self.click_sign_in()
-		self.sign_in_email.clear()
-		self.sign_in_email.send_keys(email)
+	# def click_sign_in(self):
+	# 	self.sign_in_button.click()
 
-	def set_sign_in_pw(self,pw):
-		if not self.sign_in_open():
-			self.click_sign_in()
-		self.sign_in_pw.clear()
-		self.sign_in_pw.send_keys(pw)
+	# def set_sign_in_email(self,email):
+	# 	if not self.sign_in_open():
+	# 		self.click_sign_in()
+	# 	self.sign_in_email.clear()
+	# 	self.sign_in_email.send_keys(email)
 
-	def click_forgot_pw(self):
-		if not self.sign_in_open():
-			self.click_sign_in()
-		self.sign_in_forgot_pw.click()
-		self.load_forgot_pw()
+	# def set_sign_in_pw(self,pw):
+	# 	if not self.sign_in_open():
+	# 		self.click_sign_in()
+	# 	self.sign_in_pw.clear()
+	# 	self.sign_in_pw.send_keys(pw)
 
-	def load_forgot_pw(self):
-		try:
-			self.forgot_form = self.cont.find_element_by_tag_name('form')
-			find_by = self.forgot_form.find_element_by_tag_name
+	# def click_forgot_pw(self):
+	# 	if not self.sign_in_open():
+	# 		self.click_sign_in()
+	# 	self.sign_in_forgot_pw.click()
+	# 	self.load_forgot_pw()
 
-			self.forgot_input = (
-				self.forgot_form.find_element_by_tag_name('input'))
-			self.forgot_continue = (
-				self.forgot_form.find_element_by_id('submit_button'))
-		except NoSuchElementException:
-			self.forgot_input = None
-			self.forgot_continue = None
+	# def load_forgot_pw(self):
+	# 	try:
+	# 		self.forgot_form = self.cont.find_element_by_tag_name('form')
+	# 		find_by = self.forgot_form.find_element_by_tag_name
 
-	def set_forgot_input(self,text):
-		self.forgot_input.clear()
-		self.forgot_input.send_keys(text)
+	# 		self.forgot_input = (
+	# 			self.forgot_form.find_element_by_tag_name('input'))
+	# 		self.forgot_continue = (
+	# 			self.forgot_form.find_element_by_id('submit_button'))
+	# 	except NoSuchElementException:
+	# 		self.forgot_input = None
+	# 		self.forgot_continue = None
 
-	def click_forgot_continue(self):
-		self.forgot_continue.click()
+	# def set_forgot_input(self,text):
+	# 	self.forgot_input.clear()
+	# 	self.forgot_input.send_keys(text)
 
-	def click_login(self):
-		if not self.sign_in_open():
-			self.click_sign_in()
+	# def click_forgot_continue(self):
+	# 	self.forgot_continue.click()
+
+	# def click_login(self):
+	# 	if not self.sign_in_open():
+	# 		self.click_sign_in()
 		self.sign_in_continue.click()
 
 	def signed_in(self):

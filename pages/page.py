@@ -242,7 +242,8 @@ class Page:
     try:
       # 'sendmi_error' is error div on most forms
       # different from 'required' error you will get for individual fields
-      el = self.driver.find_element_by_id('sendmi_error')
+      # el = self.driver.find_element_by_id('sendmi_error')
+      el = self.driver.find_element_by_class_name('alert-danger')
       # script = 'return arguments[0].innerHTML;'
       # innerHTML = self.driver.execute_script(script, el)
       # print('type: ' + str(type(innerHTML)))
@@ -250,8 +251,8 @@ class Page:
 
       text = el.text
       index = text.find('alert')
-      print(text[index + 5:])
-      return text[index + 5:]
+      print(text[index + 3:])
+      return text[index + 3:]
       # return self.parseReactText(innerHTML)
     except NoSuchElementException:
       return None

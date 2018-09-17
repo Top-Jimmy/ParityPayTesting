@@ -426,7 +426,7 @@ class EHomePage(Page):
 			info = {
 				'amount': self.read_transaction_amount(divs[4].text),
 				'recipient': self.read_transaction_recipient(divs[3].text),
-				'status': self.read_transaction_status(spans[1].text),
+				'status': self.read_transaction_status(spans[2].text),
 				# 'date': self.read_transaction_date(divs[5].text),
 				'icon': self.read_transaction_icon(self.transactions[index])
 			}

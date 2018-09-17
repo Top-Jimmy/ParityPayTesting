@@ -1,8 +1,9 @@
 from selenium.common.exceptions import (NoSuchElementException,
     StaleElementReferenceException, ElementNotVisibleException,
     InvalidElementStateException, WebDriverException)
-
 import time
+
+import main
 
 class NavigationFunctions():
   def __init__(self, driver):
@@ -18,10 +19,16 @@ class NavigationFunctions():
       count = 0
       while not setValue and count < 5:
         try:
+          raw_input('Nav: About to clear input')
           inputEl.clear()
+          raw_input('Nav: About to send keys')
           inputEl.send_keys(value)
+          if main.is_ios():
+            raw_input('Nav: About to click input')
+            self.click_el(inputEl)
           if inputEl.get_attribute('value') == value:
             setValue = True
+            raw_input('input has correct value')
           else:
             print('SetInput: Expected "' + value + '", loaded "' + str(inputEl.get_attribute('value') + '"'))
         except InvalidElementStateException:
