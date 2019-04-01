@@ -1,17 +1,19 @@
 # coding: utf-8
-from selenium.common.exceptions import (NoSuchElementException,
-	StaleElementReferenceException, WebDriverException)
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.wait import WebDriverWait
 from page import Page
 from components import menu
 from components import header
+from navigation import NavigationFunctions
 import main
+
 import time
 from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import (NoSuchElementException,
+	StaleElementReferenceException, WebDriverException)
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
 
 # WDW find element: class = sm-employee-table
 
@@ -35,6 +37,7 @@ class EmployeePage(Page):
 				EC.presence_of_element_located((By.CLASS_NAME, 'sm-employee-table')) or
 				EC.presence_of_element_located((By.CLASS_NAME, 'employeeDiv'))
 				)
+			self.nav = NavigationFunctions(self.driver)
 			self.load_body()
 			if EmployeePage.debug:
 				raw_input('1')
@@ -229,11 +232,12 @@ class EmployeePage(Page):
 
 	def employee_menu(self, find_by, identifier, command_text='click'):
 		"""Find employee, 'click': just open menu, 'reinvite', 'remove' """
-		emp = self.get_employee(find_by,identifier,False)
+		emp = self.get_employee(find_by, identifier, False)
 		try:
 			emp_menu = emp.find_element_by_tag_name('button')
 			# move to emp. click toast (if visible)
-			AC(self.driver).move_to_element(emp).perform()
+			self.nav.click_el(emp_menu)
+			# AC(self.driver).move_to_element(emp).perform()
 			time.sleep(.2)
 			self.click_toast()
 			time.sleep(.2)

@@ -49,7 +49,7 @@ class PreDisclosurePage(Page):
 		self.transfer_amount = (
 			self.table_rows[0].find_elements_by_tag_name('td')[0].text)
 		self.transfer_fee = (
-			self.table_rows[1].find_elements_by_tag_name('td')[0].text[2:])
+			self.table_rows[1].find_elements_by_tag_name('td')[0].text[1:])
 		self.transfer_total = (
 			self.table_rows[2].find_elements_by_tag_name('td')[0].text)
 

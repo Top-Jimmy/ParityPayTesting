@@ -6,26 +6,29 @@ import browser
 import main
 import messages
 
-# TestBank - 6
+# TestBank - 9
 	# test_add_account
 	# test_add_mx_recipient
 	# test_add_us_recipient
 	# test_duplicate
 	# test_navigation
 	# test_no_balance
-	# test_us_success
+	# test_refund_mx
+	# test_success_mx
+	# test_success_us
+	# test_upper_limit
 
 class TestBank(unittest.TestCase):
 	def setUp(self):
 		self.driver = browser.start(main.get_env(),main.get_browser())
-		self.cheeks = profiles.Profile(self.driver,'cheeks')
-		self.nicol = profiles.Profile(self.driver,'nicol')
+		self.cheeks = profiles.Profile(self.driver, 'cheeks')
+		self.nicol = profiles.Profile(self.driver, 'nicol')
 
 	def tearDown(self):
 		self.driver.quit()
 
 	def test_add_account(self):
-		"""SendToBank: Bank .              test_add_account"""
+		""" test_send_to_bank.py:TestBank.test_add_account """
 		eHome = self.cheeks.eHome_page
 		send_to_bank = self.cheeks.send_to_bank_page
 		recipient_list = self.cheeks.recipient_page
@@ -70,8 +73,7 @@ class TestBank(unittest.TestCase):
 		self.assertTrue(recip_card.on())
 
 	def test_add_mx_recipient(self):
-		"""SendToBank: Bank .               test_add_mx_recipient"""
-		# Should remember DOB when adding info for ATM
+		""" test_send_to_bank.py:TestBank.test_add_mx_recipient """
 		eHome = self.cheeks.eHome_page
 		send_to_bank = self.cheeks.send_to_bank_page
 		send_to_atm = self.cheeks.send_to_atm_page
@@ -116,30 +118,10 @@ class TestBank(unittest.TestCase):
 		self.assertEqual('Mexico', bank_page.get_location())
 		bank_page.set_clabe(clabe)
 		bank_page.click_continue()
-
-		# MX accounts should prompt for DOB after selecting bank account
 		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
-		self.assertTrue(send_to_bank.click_account(recip_1, 0, True))
-		send_to_bank.set_dob(dob)
-
-		# Verify DOB is autofilled when trying to send to ATM
-		# send_to_bank.menu.click_option('ehome')
-		send_to_bank.header.click_back()
-		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
-		send_to_bank.header.click_back()
-
-		self.assertTrue(eHome.on())
-		eHome.send('atm')
-		self.assertTrue(send_to_atm.on([0, 'Recipient']))
-		send_to_atm.click_recipient(recip_1)
-		self.assertTrue(send_to_atm.on([0, 'Recipient'], True))
-		info = send_to_atm.data_form.get_info()
-		self.assertEqual(info['dob'], dob)
 
 		# Delete recip_1		
-		send_to_atm.header.click_back()
-		self.assertTrue(send_to_atm.on([0, 'Recipient']))
-		send_to_atm.header.click_back()
+		send_to_bank.header.click_back()
 		self.assertTrue(eHome.on())
 		eHome.menu.click_option('recipients')
 		self.assertTrue(recipient_list.on())
@@ -149,7 +131,7 @@ class TestBank(unittest.TestCase):
 		self.assertTrue(recipient_list.on())
 
 	def test_add_us_recipient(self):
-		"""SendToBank: Bank .               test_add_us_recipient"""
+		""" test_send_to_bank.py:TestBank.test_add_us_recipient """
 		eHome = self.cheeks.eHome_page
 		send_to_bank = self.cheeks.send_to_bank_page
 		recipient_list = self.cheeks.recipient_page
@@ -215,7 +197,7 @@ class TestBank(unittest.TestCase):
 			self.assertTrue(recipient_list.on())
 
 	def test_duplicate(self):
-		"""SendToBank: Bank .                             test_duplicate"""
+		""" test_send_to_bank.py:TestBank.test_duplicate """
 		eHome = self.cheeks.eHome_page
 		send_to_bank = self.cheeks.send_to_bank_page
 		recipient_list = self.cheeks.recipient_page
@@ -277,7 +259,7 @@ class TestBank(unittest.TestCase):
 		self.assertTrue(recipient_list.on())
 
 	def test_navigation(self):
-		"""SendToBank: Bank .                     test_navigation"""
+		""" test_send_to_bank.py:TestBank.test_navigation """
 		# Check back button and steps for all pages in send flow
 		eHome = self.cheeks.eHome_page
 		send_to_bank = self.cheeks.send_to_bank_page
@@ -335,7 +317,7 @@ class TestBank(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_no_balance(self):
-		"""SendToBank: Bank .                                       no_balance"""
+		""" test_send_to_bank.py:TestBank.test_no_balance """
 		# trying to send w/ no balance works as expected
 		lobby_page = self.nicol.lobby_page
 		eHome = self.nicol.eHome_page
@@ -355,7 +337,6 @@ class TestBank(unittest.TestCase):
 		self.assertEqual([0, 'Choose Account'], send_to_bank.currentStep)
 		self.assertTrue(send_to_bank.click_account(recip, 'Wells Fargo Bank'))
 
-
 		# Step 2 - Set amount, check for balance error
 		self.assertEqual([1, 'Specify Amount'], send_to_bank.currentStep)
 		usd_amount = self.nicol.generate_amount()
@@ -363,25 +344,204 @@ class TestBank(unittest.TestCase):
 		self.assertTrue(send_to_bank.send_form.has_balance_error())
 		send_to_bank.send_form.set_usd(usd_amount)
 		self.assertTrue(send_to_bank.send_form.has_balance_error())
-		send_to_bank.send_form.try_clear_balance_error()
+		send_to_bank.send_form.try_clear_error()
 		self.assertFalse(send_to_bank.send_form.has_balance_error())
 
-	def test_us_success(self):
-		"""SendToBank: Bank .                          test_us_success"""
-		# David needs Zions and Wells Fargo bank accounts
-		#Send and Disclosure pages interact as expected
+	def test_refund_mx(self):
+		""" test_send_to_bank.py:TestBank.test_refund_mx """
+		# Send to Lourdes Ortega's MX bank account (bad clabe)
+		# STP test server puts non '846' clabes in refund state
+		eHome = self.cheeks.eHome_page
+		send_to_bank = self.cheeks.send_to_bank_page
+		td_page = self.cheeks.td_page
+		recip_card = self.cheeks.recipient_view_page
+		recipient = 'Lourdes Ortega'
+		bank_name = 'BBVA Bancomer'
+		usd_amount = self.cheeks.generate_amount()
+		fee = '1.00'
+		total = str(Decimal(usd_amount) + Decimal(fee))
+
+		# Login and select Lourdes Ortega
+		self.assertTrue(self.cheeks.login(self.driver), messages.login)
+		eHome.send('bank')
+		self.assertTrue(send_to_bank.on())
+		self.assertTrue(send_to_bank.click_account(recipient, bank_name))
+		send_to_bank.set_step('Choose Account')
+		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
+		self.assertTrue(send_to_bank.click_account(recipient, bank_name))
+
+		# send page is setup as expected
+		self.assertFalse(send_to_bank.send_form.is_form_enabled())
+		self.assertEqual("0", send_to_bank.send_form.get_usd())
+		balance = send_to_bank.send_form.get_balance()
+		self.assertNotEqual(None, send_to_bank.send_form.exchange_rate)
+
+		# send page: usd amount
+		send_to_bank.send_form.set_usd(usd_amount)
+		self.assertEqual(usd_amount, send_to_bank.send_form.get_usd())
+		send_to_bank.send_form.click_continue()
+
+		# disclosure page: name, amount, fee, total, exchange rate, disclosures
+		self.assertTrue(send_to_bank.on([2, 'Confirm & Send']))
+		self.assertEqual(recipient, send_to_bank.disclosure.get_name())
+		self.assertEqual(usd_amount, send_to_bank.disclosure.get_transfer_amount())
+		self.assertEqual(fee, send_to_bank.disclosure.get_transfer_fee())
+		self.assertEqual(total, send_to_bank.disclosure.get_transfer_total())
+		self.assertNotEqual(None, send_to_bank.disclosure.get_exchange_rate())
+		self.assertFalse(send_to_bank.disclosure.has_d_30())
+		self.assertTrue(send_to_bank.disclosure.has_d_less())
+		self.assertTrue(send_to_bank.disclosure.has_d_notify())
+
+		# Send, confirmation dialog
+		send_to_bank.disclosure.click_continue()
+		self.assertTrue(eHome.on('activity'))
+		self.assertTrue(eHome.clear_confirmation_dialog())
+		self.assertTrue(eHome.on('activity'))
+
+		# HistoryEntry: sending, clock
+		data = eHome.get_transaction()
+		self.assertEqual(data['amount'], '-' + total)
+		self.assertEqual(data['recipient'], recipient)
+		self.assertEqual(data['icon'], 'clock')
+		self.assertEqual(data['status'], 'Sending')
+
+		# TransferDetails: sending, clock, actions.
+		eHome.click_transaction()
+		self.assertTrue(td_page.on())
+		self.assertEqual('clock', td_page.read_transaction_icon())
+		self.assertEqual(td_page.send_now_button, None)
+		self.assertEqual(td_page.cancel_button, None)
+		self.assertEqual(td_page.delay_disclosure, None)
+
+		# Should go into 'delayed' state soon (wait ~5 seconds)
+		time.sleep(4)
+		self.driver.refresh() # Works on native app?
+		self.assertTrue(td_page.on())
+		self.assertEqual('clock', td_page.read_transaction_icon())
+		self.assertEqual(td_page.send_now_button, None)
+		self.assertEqual(td_page.cancel_button, None)
+		raw_input('disclosure?')
+		self.assertNotEqual(td_page.delay_disclosure, None)
+
+		# Recipient link
+		td_page.click_recip_link()
+		self.assertTrue(recip_card.on())
+		recip_card.header.click_back()
+		self.assertTrue(td_page.on())
+
+		# TransferDetails: Cancel/Refund transfer:
+		td_page.refund_transaction('cancel')
+		self.assertTrue(td_page.on())
+		self.assertEqual('clock', td_page.read_transaction_icon())
+		self.assertEqual(td_page.send_now_button, None)
+		self.assertEqual(td_page.cancel_button, None)
+		self.assertNotEqual(td_page.delay_disclosure, None)
+
+		td_page.refund_transaction()
+		self.assertTrue(td_page.on())
+		self.assertEqual('x', td_page.read_transaction_icon())
+		self.assertEqual(td_page.send_now_button, None)
+		self.assertEqual(td_page.cancel_button, None)
+		self.assertEqual(td_page.delay_disclosure, None)
+		self.assertEqual(td_page.cancel_button, None)
+		td_page.click_continue()
+
+		# HistoryEntry: Canceled
+		# (Will be on send tab instead of activity because of refresh)
+		self.assertTrue(eHome.on('send'))
+		eHome.setTab('activity')
+		self.assertTrue(eHome.on('activity'))
+		data = eHome.get_transaction()
+		self.assertEqual(data['amount'], '-' + total)
+		self.assertEqual(data['recipient'], recipient)
+		self.assertEqual(data['icon'], 'x')
+		self.assertEqual(data['status'], 'Canceled')
+
+	def test_success_mx(self):
+		""" test_send_to_bank.py:TestBank.test_success_mx """
+		# Send to Lourdes Ortega's MX bank account
+		eHome = self.cheeks.eHome_page
+		send_to_bank = self.cheeks.send_to_bank_page
+		td_page = self.cheeks.td_page
+		recip_card = self.cheeks.recipient_view_page
+		recip = 'Lourdes Ortega'
+		bank_name = 'Sistema de Transferencias y Pagos STP'
+		usd_amount = self.cheeks.generate_amount()
+		fee = '1.00'
+
+		# Login and select Lourdes Ortega
+		self.assertTrue(self.cheeks.login(self.driver), messages.login)
+		eHome.send('bank')
+		self.assertTrue(send_to_bank.on())
+		self.assertTrue(send_to_bank.click_account(recip, 'BBVA Bancomer'))
+		send_to_bank.set_step('Choose Account')
+		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
+		self.assertTrue(send_to_bank.click_account(recip, 'BBVA Bancomer'))
+
+		# send page is setup as expected
+		self.assertFalse(send_to_bank.send_form.is_form_enabled())
+		self.assertEqual("0", send_to_bank.send_form.get_usd())
+		balance = send_to_bank.send_form.get_balance()
+		self.assertNotEqual(None, send_to_bank.send_form.exchange_rate)
+
+		# send page amounts work as expected
+		send_to_bank.send_form.set_usd(usd_amount)
+		self.assertEqual(usd_amount, send_to_bank.send_form.get_usd())
+		send_to_bank.send_form.click_continue()
+
+		# disclosure page: name, amount, fee, totals, exchange rate, disclosures
+		self.assertTrue(send_to_bank.on([2, 'Confirm & Send']))
+		self.assertEqual(recip, send_to_bank.disclosure.get_name())
+		self.assertEqual(usd_amount, send_to_bank.disclosure.get_transfer_amount())
+		self.assertEqual(fee, send_to_bank.disclosure.get_transfer_fee())
+		total = str(Decimal(usd_amount) + Decimal(fee))
+		self.assertEqual(total, send_to_bank.disclosure.get_transfer_total())
+		self.assertNotEqual(None, send_to_bank.disclosure.get_exchange_rate())
+		self.assertFalse(send_to_bank.disclosure.has_d_30())
+		self.assertTrue(send_to_bank.disclosure.has_d_less())
+		self.assertTrue(send_to_bank.disclosure.has_d_notify())
+
+		# send, clear confirmation dialog
+		send_to_bank.disclosure.click_continue()
+		self.assertTrue(eHome.on('activity'))
+		self.assertTrue(eHome.clear_confirmation_dialog())
+		self.assertTrue(eHome.on('activity'))
+
+		# HistoryEntry: Sending, clock
+		data = eHome.get_transaction()
+		self.assertEqual(data['amount'], '-' + total)
+		self.assertEqual(data['recipient'], recip)
+		self.assertEqual(data['icon'], 'clock')
+		self.assertEqual(data['status'], 'Sending')
+
+		# TransferDetails: Clock, actions, recipient link, delay disclosure
+		eHome.click_transaction()
+		self.assertTrue(td_page.on())
+		self.assertEqual('clock', td_page.read_transaction_icon())
+		self.assertEqual(td_page.send_now_button, None)
+		self.assertEqual(td_page.cancel_button, None)
+		self.assertEqual(td_page.delay_disclosure, None)
+		td_page.click_recip_link()
+		self.assertTrue(recip_card.on())
+		recip_card.header.click_back()
+		self.assertTrue(td_page.on())
+		td_page.click_continue()
+
+		self.assertTrue(eHome.on('activity'))
+
+	def test_success_us(self):
+		""" test_send_to_bank.py:TestBank.test_success_us """
+		# Send to David Castillo's US bank account
 		eHome = self.cheeks.eHome_page
 		send_to_bank = self.cheeks.send_to_bank_page
 		td_page = self.cheeks.td_page
 		recip = 'David Castillo'
 
-		# Login and select David Castillo
 		self.assertTrue(self.cheeks.login(self.driver), messages.login)
 		eHome.send('bank')
 		self.assertTrue(send_to_bank.on())
 		self.assertTrue(send_to_bank.click_account(recip, 'Wells Fargo Bank'))
 		send_to_bank.set_step('Choose Account')
-		# send_to_bank.header.click_back()
 		self.assertTrue(send_to_bank.on([0, 'Choose Account']))
 		self.assertTrue(send_to_bank.click_account(recip, 'Zions Bank'))
 
@@ -418,7 +578,7 @@ class TestBank(unittest.TestCase):
 		# send, clear confirmation dialog
 		send_to_bank.disclosure.click_continue()
 		self.assertTrue(eHome.on('activity'))
-		eHome.clear_confirmation_dialog()
+		self.assertTrue(eHome.clear_confirmation_dialog())
 		self.assertTrue(eHome.on('activity'))
 
 		# Check transaction
@@ -437,3 +597,108 @@ class TestBank(unittest.TestCase):
 		td_page.click_continue()
 
 		self.assertTrue(eHome.on('activity'))
+
+
+	# def test_upper_limit(self):
+	# 	""" test_send_to_bank.py:TestBank.test_upper_limit """
+	# 	# Send >$1000 to David Castillo's US bank account.
+	# 	self.juan = profiles.Profile(self.driver, 'juan')
+	# 	eHome = self.juan.eHome_page
+	# 	send_to_bank = self.juan.send_to_bank_page
+	# 	td_page = self.juan.td_page
+	# 	recip = 'Juan This One at Sendmi Rodriguz'
+	# 	usd_amount = '1000.00'
+
+	# 	self.assertTrue(self.juan.login(self.driver), messages.login)
+	# 	eHome.send('bank')
+	# 	self.assertTrue(send_to_bank.on())
+	# 	self.assertTrue(send_to_bank.click_account('', 'J.P. Morgan Chase'))
+
+	# 	# send page is setup as expected
+	# 	self.assertFalse(send_to_bank.send_form.is_form_enabled())
+	# 	self.assertEqual("0", send_to_bank.send_form.get_usd())
+	# 	balance = send_to_bank.send_form.get_balance()
+	# 	self.assertEqual(None, send_to_bank.send_form.exchange_rate)
+
+	# 	# send page amounts work as expected
+	# 	send_to_bank.send_form.set_usd(usd_amount)
+	# 	self.assertEqual(usd_amount, send_to_bank.send_form.get_usd())
+	# 	send_to_bank.send_form.click_continue()
+
+	# 	# disclosure page has everything we expect
+	# 	self.assertTrue(send_to_bank.on([2, 'Confirm & Send']))
+	# 	# check name and totals
+	# 	self.assertEqual(recip, send_to_bank.disclosure.get_name())
+
+	# 	self.assertEqual(usd_amount, send_to_bank.disclosure.get_transfer_amount())
+	# 	fee = '0.00'
+	# 	self.assertEqual(fee, send_to_bank.disclosure.get_transfer_fee())
+	# 	total = Decimal(usd_amount) + Decimal(fee)
+	# 	self.assertEqual(str(total), send_to_bank.disclosure.get_transfer_total())
+
+	# 	# check exchange rate and disclosures
+	# 	self.assertEqual(None, send_to_bank.disclosure.get_exchange_rate())
+
+	# 	self.assertFalse(send_to_bank.disclosure.has_d_30())
+	# 	self.assertFalse(send_to_bank.disclosure.has_d_less())
+	# 	self.assertTrue(send_to_bank.disclosure.has_d_notify())
+
+	# 	# try to send, verify error
+	# 	send_to_bank.disclosure.click_continue()
+	# 	time.sleep(2)
+	# 	self.assertTrue(send_to_bank.disclosure.has_upper_limit_error())
+	# 	send_to_bank.disclosure.try_clear_error()
+	# 	self.assertFalse(send_to_bank.disclosure.has_upper_limit_error())
+
+
+
+# Functionality
+
+# 1. Choose Account (US or MX)
+	# Add Account (US or MX)
+		# Add Recipient (US or MX)
+
+# 2. Set amount
+
+# 3. Confirm
+
+# Confirmation popup
+
+# HistoryEntry
+
+# TransferDetails
+
+
+
+
+# Check
+# General
+	# back button
+
+# 1. Choose Account
+
+# 2.
+
+# 3
+# amount, fee, total
+# disclosures
+
+
+
+# Document
+# Difference between US/MX based recipients
+	# Default bank type?
+
+# Difference between sending to US/MX bank vs ATM
+
+# Differences between test/prod
+	# Test: STP: Non-STP clabes get rejected (error 1?)
+	# Test: ACH/STP:  transfers get returned from Jeff's account?
+
+
+
+
+
+
+
+

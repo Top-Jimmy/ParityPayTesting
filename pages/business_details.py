@@ -1,15 +1,17 @@
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import (NoSuchElementException,
-	StaleElementReferenceException, TimeoutException, WebDriverException)
+import main
 from page import Page
 from components import menu
 from components import header
+from navigation import NavigationFunctions
+
 import time
-import main
 from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import (NoSuchElementException,
+	StaleElementReferenceException, TimeoutException, WebDriverException)
 
 # Different from business_prefilled.py
 # Get to page by adding business and clicking "Can't find business".
@@ -20,6 +22,7 @@ class BusinessDetailsPage(Page):
 
 	def load(self):
 		try:
+			self.nav = NavigationFunctions(self.driver)
 			self.load_body()
 			self.menu = menu.SideMenu(self.driver)
 			self.header = header.PrivateHeader(self.driver)
@@ -65,12 +68,13 @@ class BusinessDetailsPage(Page):
 		# agree_checkbox is touchy.
 		# Think you need to reload form after clicking checkbox or submitting form
 		# (only need to reload form after submission if you toggle checkbox afterwards)
+		self.nav.dismiss_keyboard()
 		self.scroll_to_bottom()
 		selected = self.agreed()
 		if main.get_browser() == 'safari':
-			self.agree_cont.click()
+			self.nav.click_el(self.agree_cont)
 		else:
-			self.agree_checkbox.click()
+			self.nav.click_el(self.agree_checkbox)
 		if selected is self.agreed():
 			print('checkbox not altered!')
 		time.sleep(.4)
@@ -127,18 +131,18 @@ class BusinessDetailsPage(Page):
 		"""Pass in name of el and desired value. Don't use for setting state"""
 		el = self.get_el(name)
 		if el is not None:
-			self.move_to_el(el)
 			if name == 'state':
 				time.sleep(.4)
+				self.nav.dismiss_keyboard()
+				self.nav.move_to_el(el)
 				self.set_state(value)
 			else:
-				el.clear()
-				el.send_keys(value)
+				self.nav.set_input(el, value)
 
 				# ios: Inputs dont seem to update unless you click after setting value
 				# i.e. 'Required' errors won't show up just for sending keys.
-				if main.is_ios():
-					el.click()
+				# if main.is_ios():
+				# 	self.nav.click_el(el)
 
 	def set_state(self, state_text):
 		WDW(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'sm-state-menuitem')))
@@ -147,7 +151,7 @@ class BusinessDetailsPage(Page):
 			for i, state in enumerate(self.states):
 				text = self.states[i].text
 				if text == state_text:
-					self.states[i].click()
+					self.nav.click_el(self.states[i])
 					break
 		except NoSuchElementException:
 			# couldn't find state. De-select dropdown
@@ -155,22 +159,14 @@ class BusinessDetailsPage(Page):
 		WDW(self.driver, 10).until_not(EC.presence_of_element_located((By.CLASS_NAME, 'sm-state-menuitem')))
 
 	# select state by typing keys, then selecting state by pressing enter
+	# Not used, doesn't work. Issues using AC functions. Use nav functions
 	def type_state(self,state):
 		self.move_to_el(self.state_dd)
-		# AC(self.driver).move_to_element(self.state_dd).perform()
-		# self.state_dd.click()
 		time.sleep(1.4) # need decent wait before sending keys
 		AC(self.driver).send_keys(state).perform()
 		time.sleep(.4)
 		AC(self.driver).send_keys(Keys.ENTER).perform()
 		time.sleep(.4)
-
-	# def click_continue(self):
-	# 	el = self.continue_button
-	# 	self.scroll_to_bottom()
-	# 	# AC(self.driver).move_to_element(el).perform()
-	# 	el.click()
-	# 	time.sleep(.4)
 
 	def click_continue(self):
 		self.scroll_to_bottom()

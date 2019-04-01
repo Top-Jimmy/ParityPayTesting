@@ -17,9 +17,9 @@ class Profile:
   def __init__(self, driver, name=None):
     self.driver = driver
     self.credentials = credentials.get_credentials(name)
-    if name is not None:
-      self.businesses = dict([(x, credentials.get_credentials(x)) for x in
-                  self.credentials['businesses']])
+    # if name is not None:
+    #   self.businesses = dict([(x, credentials.get_credentials(x)) for x in
+    #               self.credentials['businesses']])
 
     # Pages
     # syntax: self.whatever = filename(same as in __init__.py).Classname(driver)
@@ -33,9 +33,9 @@ class Profile:
       reset_password.ResetPasswordNewPage(driver)
     )
     # enroll process (business or responding to invite)
+    self.invite_pre_screen_page = invite_pre_screen.InvitePreScreenPage(driver)
     self.dob_page = invite.DOBPage(driver)
     self.invite_page = invite.InvitePage(driver)
-
     self.enroll_code_page = enroll_code.EnrollCodePage(driver)
     self.enroll_factor2_page = enroll_factor2.EnrollFactor2Page(driver)
     self.enroll_name_page = enroll_name.EnrollNamePage(driver)
@@ -123,12 +123,17 @@ class Profile:
     # self.additional_info = additional_info.AddInfo(driver)
 
   def login(self, driver, password=None, email=None):
+    # Wingcash captcha stuff on Sign In page seems busted. Doesn't let you load it.
+    # Go to home page first instead of directly to Sign In
     # Enter credentials
-    if (main.is_web() and self.signin_page.go()) or self.signin_page.on():
-      if password is None:
-        password = self.credentials['password']
-      if email is None:
-        email = self.credentials['email']
+    if password is None:
+      password = self.credentials['password']
+    if email is None:
+      email = self.credentials['email']
+
+    if main.is_web() and self.for_employers.go(): 
+      self.for_employers.header.sign_in_submit(email, password)
+    elif self.signin_page.on():
       self.signin_page.submit(email, password)
     else:
       # Couldn't loading signin page
@@ -305,6 +310,14 @@ class Profile:
         return second + "00"
     else:
       return first + second + "00"
+
+  def format_phone(self, phone):
+    if len(phone) == 10:
+      formatted = '(' + str(phone[0:3]) + ') ' + str(phone[3:6]) + '-' + str(phone[6:])
+      print(formatted)
+      return formatted
+    else:
+      print('Unexpected phone number. Wrong length')
 
   def quit(self):
     self.driver.quit()

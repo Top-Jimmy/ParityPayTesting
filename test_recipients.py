@@ -48,7 +48,7 @@ class TestDuplicates(unittest.TestCase):
 		self.driver.quit()
 
 	def test_duplicate_add(self):
-		"""recipients : Duplicates .                           duplicate_add"""
+		""" test_recipients.py:TestDuplicates.test_duplicate_add """
 		#dependencies: Recipient Rosa Castillo has an account
 		eHome = self.cheeks.eHome_page
 		recip_select_page = self.cheeks.recipient_page
@@ -72,7 +72,7 @@ class TestDuplicates(unittest.TestCase):
 		# self.assertTrue(ba_page.on())
 
 	def test_duplicate_continue(self):
-		"""recipients : Duplicates .                      duplicate_continue"""
+		""" test_recipients.py:TestDuplicates.test_duplicate_continue """
 		#dependencies: Recipient Yolanda Castillo exists already.
 		eHome = self.cheeks.eHome_page
 		recip_select_page = self.cheeks.recipient_page
@@ -147,7 +147,7 @@ class TestDuplicates(unittest.TestCase):
 			self.assertTrue(view_page.on())
 
 	def test_duplicate_send(self):
-		"""recipients : Duplicates .                          duplicate_send"""
+		""" test_recipients.py:TestDuplicates.test_duplicate_send """
 		eHome = self.cheeks.eHome_page
 		recip_select_page = self.cheeks.recipient_page
 		name_page = self.cheeks.recipient_name_page
@@ -172,7 +172,7 @@ class TestDuplicates(unittest.TestCase):
 		self.assertTrue(send_page.on())
 
 	def test_duplicate_send_no_account(self):
-		"""recipients : Duplicates .               duplicate_send_no_account"""
+		""" test_recipients.py:TestDuplicates.test_duplicate_send_no_account """
 		# dependencies: Yolanda Castillo has address, but no bank accounts
 		eHome = self.cheeks.eHome_page
 		recip_select_page = self.cheeks.recipient_page
@@ -199,7 +199,7 @@ class TestDuplicates(unittest.TestCase):
 
 	#
 	def test_duplicate_send_no_address(self):
-		"""recipients : Duplicates .               duplicate_send_no_address"""
+		""" test_recipients.py:TestDuplicates.test_duplicate_send_no_address """
 		# Reset Yolanda's account if this is failing.
 		# Make sure there's only 1 recipient named Yolanda.
 		# Should have 0 bank accounts
@@ -297,7 +297,7 @@ class TestEdit(unittest.TestCase):
 	# 	self.assertEqual(view_page.num_accounts(), 0)
 
 	def test_delete_account(self):
-		"""recipients : Edit .                                delete_account"""
+		""" test_recipients.py:TestEdit.test_delete_account """
 		# Adding account from 'recipient' page should redirect to view page
 		# Yolanda should end test w/ no bank accounts
 		eHome = self.cheeks.eHome_page
@@ -320,8 +320,7 @@ class TestEdit(unittest.TestCase):
 		view_page.add_destination()
 
 		self.assertTrue(ba_page.on())
-		# ba_page.set_destination_type('bank')
-		# ba_page.set_location('us')
+		ba_page.set_location('us')
 		zions_routing = "124000054"
 		acct_number = "123456780001"
 		ba_page.set_routing(zions_routing)
@@ -341,7 +340,7 @@ class TestEdit(unittest.TestCase):
 		self.assertEqual(view_page.num_accounts(), 0)
 
 	def test_edit_account(self):
-		"""recipients : Edit .                                  edit_account"""
+		""" test_recipients.py:TestEdit.test_edit_account """
 		# dependencies: Recip Roberto Ortega w/ zions bank account
 		# 17 digit acct #, checking account.
 		eHome = self.cheeks.eHome_page
@@ -411,7 +410,7 @@ class TestEdit(unittest.TestCase):
 		self.assertTrue(recip_page.on())
 
 	def test_edit_additional_info(self):
-		"""recipients : Edit .                          edit_additional_info"""
+		""" test_recipients.py:TestEdit.test_edit_additional_info """
 		# Test that editing recipient's additional info persists
 		# Dependencies: Roberto Ortega has BBVA cashout
 		eHome = self.cheeks.eHome_page
@@ -435,18 +434,14 @@ class TestEdit(unittest.TestCase):
 		self.assertTrue(info_page.on())
 		initial_info = info_page.addInfo.get_info()
 
-		new_carrier = 'nextel'
-		new_phone = '202' + self.cheeks.generate_number(7)
+		new_carrier = 'telcel'
+		new_phone = self.cheeks.format_phone('202' + self.cheeks.generate_number(7))
 		new_dob = self.cheeks.generate_rfc_dob()
 
-		# Test Code
-		info_page.addInfo.set_dob(new_dob)
-		# End Test Code
-
-		if initial_info['carrier'] == 'nextel':
-			new_carrier = 'unefon'
+		if initial_info['carrier'] == 'telcel':
+			new_carrier = 'at&t'
 		while new_phone == initial_info['phone']:
-			new_phone = '202' + self.cheeks.generate_number(7)
+			new_phone = self.cheeks.format_phone('202' + self.cheeks.generate_number(7))
 			while new_dob != initial_info['dob']:
 				new_dob = self.cheeks.generate_rfc_dob()
 		new_info = {
@@ -454,7 +449,6 @@ class TestEdit(unittest.TestCase):
 			'phone': new_phone,
 			'dob': new_dob,
 		}
-		print(new_info)
 		info_page.addInfo.set_info(new_info)
 		info_page.addInfo.click_continue()
 		self.assertTrue(view_page.on())
@@ -465,25 +459,10 @@ class TestEdit(unittest.TestCase):
 		updated_info = info_page.addInfo.get_info()
 		self.assertEqual(new_info['carrier'], updated_info['carrier'])
 		self.assertEqual(new_info['phone'], updated_info['phone'])
-		self.assertEqual(new_info['rfc'], updated_info['rfc'])
-		# self.assertEqual(new_info['pin'], updated_info['pin'])
-
-		# Check RFC validation
-		bad_rfc = [
-			'abcd000000',
-			'abcd030229'
-		]
-		# business rfcs have 3 characters ('abc030229')
-		error = 'Expected RFC format: ABCD000000 or ABCD000000123.'
-		for i, rfc in enumerate(bad_rfc):
-			info_page.addInfo.set_rfc(bad_rfc[i])
-			# Seems like you need to click off input for it to recognize change
-			info_page.header.click_header()
-			WDW(self.driver, 10).until(
-				EC.text_to_be_present_in_element((By.ID, 'rfc_helper'), error))
+		self.assertEqual(new_info['dob'], updated_info['dob'])
 
 	def test_edit_address(self):
-		"""recipients : Edit .                                  edit_address"""
+		""" test_recipients.py:TestEdit.test_edit_address """
 		# dependencies: Roberto Ortega starts w/ cur_address
 		eHome = self.cheeks.eHome_page
 		recip_page = self.cheeks.recipient_page
@@ -552,7 +531,7 @@ class TestEdit(unittest.TestCase):
 	# 	pass
 
 	def test_edit_name(self):
-		"""recipients : Edit .                                     edit_name"""
+		""" test_recipients.py:TestEdit.test_edit_name """
 		# dependencies: recipient Roberto Ortega
 		eHome = self.cheeks.eHome_page
 		recip_page = self.cheeks.recipient_page
@@ -602,7 +581,7 @@ class TestEdit(unittest.TestCase):
 
 	@unittest.skipIf(not main.is_web(), "No urls on native")
 	def test_try_access_address(self):
-		"""recipients : Edit .                            try_access_address"""
+		""" test_recipients.py:TestEdit.test_try_access_address """
 		# asserting can access address page by url
 		eHome = self.cheeks.eHome_page
 		recip_page = self.cheeks.recipient_page
@@ -698,9 +677,8 @@ class TestRecipients(unittest.TestCase):
 
 	# def test_add_new_mx_cashout(self):
 
-	@unittest.skip("Cannot add MX bank account. 3/15/18")
 	def test_add_new_mx_mx(self):
-		"""recipients : Recipients .                           add_new_mx_mx"""
+		""" test_recipients.py:TestRecipients.test_add_new_mx_mx """
 		eHome = self.cheeks.eHome_page
 		recip_select_page = self.cheeks.recipient_page
 		name_page = self.cheeks.recipient_name_page
@@ -841,7 +819,7 @@ class TestRecipients(unittest.TestCase):
 	# @unittest.expectedFailure
 	@unittest.skip("Not supporting cashout locations. 3/15/18")
 	def test_add_new_us_cash(self):
-		"""recipients : Recipients .                         add_new_us_cash"""
+		""" test_recipients.py:TestRecipients.test_add_new_us_cash """
 		# Create US based recipient w/ cashout location
 		eHome = self.cheeks.eHome_page
 		recip_page = self.cheeks.recipient_page
@@ -929,7 +907,7 @@ class TestRecipients(unittest.TestCase):
 
 	@unittest.skip("Cannot add MX bank account. 3/15/18")
 	def test_add_new_us_mx(self):
-		"""recipients : Recipients .                           add_new_us_mx"""
+		""" test_recipients.py:TestRecipients.test_add_new_us_mx """
 		# dependencies:
 		eHome = self.cheeks.eHome_page
 		recip_select_page = self.cheeks.recipient_page
@@ -998,7 +976,7 @@ class TestRecipients(unittest.TestCase):
 		view_page.remove_recipient()
 
 	def test_add_new_us_us(self):
-		"""recipients : Recipients .                           add_new_us_us"""
+		""" test_recipients.py:TestRecipients.test_add_new_us_us """
 		# Create US based recipient w/ US bank account.
 		eHome = self.cheeks.eHome_page
 		recip_page = self.cheeks.recipient_page

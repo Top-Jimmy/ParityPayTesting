@@ -1,5 +1,17 @@
    # Note: Twillio limitations will only send texts to area codes (603), (801)
 
+# Sendmi user
+andrewSendmi = {
+  'first_name': 'Andrew',
+  'last_name': 'Tidd',
+  'full': lambda x: self.first_name + ' ' + self.last_name,
+  'email': 'andrew@sendmi.com',
+  'phone': '617-555-0185',
+  'password': 'asdfasdf',
+  'businesses': ['accordionConnection']
+} #Developer
+
+# Wingcash user.
 andrew = {
   'first_name': 'Andrew',
   'last_name': 'Tidd',
@@ -10,14 +22,13 @@ andrew = {
   'businesses': ['accordionConnection']
 } #Developer
 
-brad = {
-  'first_name': 'Bradley',
-  'last_name': 'Wilkes',
-  'email': 'brad@fake.com',
-  'phone': '(801)456-7890',
-  'password': 'password',
-  'businesses': [],
-  'country': 'United States'
+juan = {
+  'first_name': 'Juan',
+  'last_name': 'Rodriguez',
+  'full': lambda x: self.first_name + ' ' + self.last_name,
+  'email': 'juan@sendmi.com',
+  # 'phone': '617-555-0185',
+  'password': 'Password12#',
 } #Developer
 
 jeffrey = {

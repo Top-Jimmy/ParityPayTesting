@@ -62,12 +62,12 @@ class AddDataForm(Component):
 		# Convert text to 'carrier code'
 		carriers = {
 			'Movistar / Virgin': 'movistar',
-			'IUSACELL (AT&T)': 'iusacell',
+			'AT&T': 'at&t',
 			'TELCEL': 'telcel',
-			# 'UNEFON (AT&T)': 'unefon',
-			# 'NEXTEL (AT&T)': 'nextel'
 		}
-		return carriers.get(self.carrier_click.text, None)
+		carrier_text = self.carrier_click.text
+		print('carrier_text: ' + str(carrier_text))
+		return carriers.get(carrier_text, None)
 
 	def set_phone(self, phone):
 		try:
@@ -93,15 +93,11 @@ class AddDataForm(Component):
 		try:
 			if dob:
 				# if self.dob_input.get_attribute('value') != dob:
-				print('clicking 1')
 				self.dob_input.click()
-				print('clearing')
 				self.dob_input.clear()
-				print('sending keys: ' + str(dob))
 				self.dob_input.send_keys(dob)
 				self.try_hide_keyboard()
 				# Need additional click to get errors to show up
-				print('clicking 2')
 				self.dob_input.click()
 				self.try_hide_keyboard()
 			else: # Set it to nothing

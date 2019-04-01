@@ -47,7 +47,7 @@ class TestAdd(unittest.TestCase):
 		self.driver.quit()
 
 	def test_admin_existing(self):
-		"""employees : Add .                          test_admin_existing"""
+		""" test_employees.py:TestAdd.test_admin_existing """
 		# Add existing employee (lili) as administrator
 		lobby_page = self.nicol.lobby_page
 		admin_page = self.nicol.admin_page
@@ -140,7 +140,7 @@ class TestAdd(unittest.TestCase):
 
 	@unittest.skipIf(not main.is_web(), 'native cannot get urls')
 	def test_admin_new(self):
-		"""employees : Add .                            test_admin_new"""
+		""" test_employees.py:TestAdd.test_admin_new """
 		# Infest admin table with Poli Wags.
 		lobby_page = self.nicol.lobby_page
 		admin_page = self.nicol.admin_page
@@ -181,6 +181,7 @@ class TestAdd(unittest.TestCase):
 		admin_page.click_toast() # clear toast or cannot click logout (mobile)
 		admin_page.menu.sign_out()
 
+		invite_pre_screen_page = self.poli.invite_pre_screen_page
 		dob_page = self.poli.dob_page
 		invite_page = self.poli.invite_page
 		factor2_page = self.poli.enroll_factor2_page
@@ -197,8 +198,17 @@ class TestAdd(unittest.TestCase):
 		'''print(urls['email_url'])
 		print(email)
 		print(phone)'''
+		raw_input('in app?')
 		self.driver.get(urls['email_url'])
 		print(urls['email_url'])
+		if not main.is_desktop():
+			self.assertTrue(invite_pre_screen_page.on())
+			raw_input('?')
+			if main.is_web():
+				invite_pre_screen_page.click('browser')
+			else:
+				invite_pre_screen_page.click('app')
+
 		self.assertTrue(dob_page.on())
 		dob_page.set_dob(dob)
 		self.assertEqual(dob, dob_page.get_dob())
@@ -270,7 +280,7 @@ class TestAdd(unittest.TestCase):
 	#  'Cannot copy/paste invite url on native')
 	@unittest.skip("Bug# 152052558. Same user duplicated in employee table")
 	def test_existing(self):
-		"""employees : Add .                               test_existing"""
+		""" test_employees.py:TestAdd.test_existing """
 
 		# kind of weird behavior. Sending invite to existing employee with
 		# same email/phone, but different Employee ID.
@@ -325,6 +335,7 @@ class TestAdd(unittest.TestCase):
 		emp_page.menu.sign_out()
 
 		# lili responds to invitation
+		invite_pre_screen_page = self.lili.invite_pre_screen_page
 		dob_page = self.lili.dob_page
 		invite_page = self.lili.invite_page
 		signin_page = self.lili.enroll_signin_page
@@ -334,6 +345,13 @@ class TestAdd(unittest.TestCase):
 		self.driver.get(urls['email_url'])
 		print(urls['email_url'])
 		time.sleep(2)
+		if not main.is_desktop():
+			self.assertTrue(invite_pre_screen_page.on())
+			if main.is_web():
+				invite_pre_screen_page.click('browser')
+			else:
+				invite_pre_screen_page.click('app')
+
 		self.assertTrue(dob_page.on())
 		dob_page.set_dob(dob)
 		self.assertEqual(dob, dob_page.get_dob())
@@ -370,7 +388,7 @@ class TestAdd(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 3, "Priority")
 	def test_form(self):
-		"""employees : Add .                                   test_form"""
+		""" test_employees.py:TestAdd.test_form """
 		# assert add employee form works as expected
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page
@@ -481,9 +499,8 @@ class TestAdd(unittest.TestCase):
 			self.assertEqual(1, num_containing(tag, 'not a valid phone number'))
 
 	def test_new(self):
-		"""employees : Add .                                 test_new"""
+		""" test_employees.py:TestAdd.test_new """
 		# create new invitation from employee table.
-		# verify info is correct in invitations table
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page
 		add_page = self.nicol.employee_add_page
@@ -558,7 +575,7 @@ class TestAdd(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_table_footer(self):
-		"""employees : Add .                           test_table_footer"""
+		""" test_employees.py:TestAdd.test_table_footer """
 		#dependencies: Nicol has business Pagination with 46 pending invites
 		lobby_page = self.nicol.lobby_page
 		invitations_page = self.nicol.invitations_page
@@ -590,8 +607,13 @@ class TestAdd(unittest.TestCase):
 
 		# Go to page 4
 		self.assertTrue(invitations_page.next_page())
-		# if invitations_page.num_invitations() > 1:
-		# 	invitations_page
+		# Make sure there's only 1 invitation on last page
+		num_invitations = invitations_page.num_invitations()
+		if num_invitations > 1:
+			for i in xrange(num_invitations):
+				if i != 0:
+					invitations_page.toggle_invitation('index', i)
+			invitations_page.delete_invitations()
 		self.assertEqual(1, invitations_page.num_invitations())
 		self.assertEqual(4, invitations_page.current_page())
 		self.assertFalse(invitations_page.next_page())
@@ -623,7 +645,7 @@ class TestAdd(unittest.TestCase):
 
 	@unittest.skipIf(main.is_android(), "Cannot handle election download popups")
 	def test_table_invite(self):
-		"""employees : Add .                            test_table_invite"""
+		""" test_employees.py:TestAdd.test_table_invite """
 		# Nicol: create new invitation from invite table.
 		# verify info is correct in table
 		# verify invitation does not show up in employee table
@@ -694,6 +716,7 @@ class TestAdd(unittest.TestCase):
 
 		# respond to invitation (don't set pay election)
 		eHome = self.poli.eHome_page
+		invite_pre_screen_page = self.poli.invite_pre_screen_page
 		dob_page = self.poli.dob_page
 		invite_page = self.poli.invite_page
 		factor2_page = self.poli.enroll_factor2_page
@@ -709,6 +732,13 @@ class TestAdd(unittest.TestCase):
 
 		self.driver.get(urls['email_url'])
 		print(urls['email_url'])
+		if not main.is_desktop():
+			self.assertTrue(invite_pre_screen_page.on())
+			if main.is_web():
+				invite_pre_screen_page.click('browser')
+			else:
+				invite_pre_screen_page.click('app')
+
 		self.assertTrue(dob_page.on())
 
 		dob_page.set_dob(dob)
@@ -820,7 +850,7 @@ class TestAdd(unittest.TestCase):
 	test_table_invite.e2e = True
 
 	def test_table_reinvite(self):
-		"""employees : Add .                           test_table_reinvite"""
+		""" test_employees.py:TestAdd.test_table_reinvite """
 		lobby_page = self.nicol.lobby_page
 		invitations_page = self.nicol.invitations_page
 		add_page = self.nicol.employee_add_page
@@ -858,7 +888,7 @@ class TestAdd(unittest.TestCase):
 		# resend invitation, respond, check in employee table
 		self.assertTrue(invitations_page.on())
 		invitations_page.click_toast()
-		invitations_page.toggle_invitation('employee id', employee_id)
+		self.assertTrue(invitations_page.toggle_invitation('employee id', employee_id))
 		self.assertTrue(invitations_page.resend_invitations())
 
 
@@ -874,7 +904,7 @@ class TestDetails(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_filter(self):
-		"""employees : Details .                             test_filter"""
+		""" test_employees.py:TestDetails.test_filter """
 		# assert employee table filtering works as expected
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page
@@ -885,11 +915,7 @@ class TestDetails(unittest.TestCase):
 			lobby_page.menu.select_business(business)
 			self.assertTrue(lobby_page.on())
 		lobby_page.menu.click_option('employees')
-
 		self.assertTrue(emp_page.on())
-		#time.sleep(.6)
-
-		#self.assertTrue(emp_page.on())
 
 		emp_page.toggle_filter()
 		active_schema = [0,0,1,0,0]
@@ -915,9 +941,8 @@ class TestDetails(unittest.TestCase):
 			or EC.visibility_of_all_elements_located((By.CLASS_NAME, 'employeeDiv'))
 			)
 		emp_page.load()
-		#raw_input('table visible?')
 		#Needs lots of time to refresh employee table.
-		conseco = emp_page.get_employee('name',"Zuriel Conseco")
+		conseco = emp_page.get_employee('name',"Jose Conseco")
 		time.sleep(.4)
 		self.assertEqual(conseco['status'],"Removed")
 
@@ -936,9 +961,9 @@ class TestDetails(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_permissions(self):
-		"""employees : Details .                         test_permissions"""
+		""" test_employees.py:TestDetails.test_permissions """
 		# assert owner can set permissions for employees
-		# dependencies: Needs employee w/ ID: 41530011
+		# dependencies: Needs employee w/ ID: 41530013
 		# email: PermissionTester@example.com, pw: asdfasdf
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page
@@ -954,7 +979,7 @@ class TestDetails(unittest.TestCase):
 
 		time.sleep(.4)
 		self.assertTrue(emp_page.on())
-		employee_id = '41530011'
+		employee_id = '41530013'
 		self.assertTrue(emp_page.click_employee('id', employee_id))
 
 		# view Poli Wag and edit permissions
@@ -983,7 +1008,7 @@ class TestDetails(unittest.TestCase):
 		self.assertTrue(emp_page.on())
 
 	def test_profile(self):
-		"""employees : Details .                        test_profile"""
+		""" test_employees.py:TestDetails.test_profile """
 		# assert employer can edit employee profile
 		#dependencies: Employee "Stand Alone2" in table
 		lobby_page = self.nicol.lobby_page
@@ -1036,14 +1061,14 @@ class TestDetails(unittest.TestCase):
 		self.assertEqual(updated_alone2['election'], alone2['election'])
 
 	def test_search(self):
-		"""employees : Details .                              test_search"""
+		""" test_employees.py:TestDetails.test_search """
 		# TODO
 		# Assert the search function works properly (Name, Emp. ID)
 		# Can't find old profiles (old = removed/terminated?)
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_sort(self):
-		"""employees : Details .                               test_sort"""
+		""" test_employees.py:TestDetails.test_sort """
 		# assert employee table sort functionality works as expected
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page
@@ -1075,7 +1100,7 @@ class TestDetails(unittest.TestCase):
 		self.assertEqual(employee, employee2)
 
 	def test_verify_permissions(self):
-		"""employees : Details .                   test_verify_permissions"""
+		""" test_employees.py:TestDetails.test_verify_permissions """
 		#Dependencies: Stand Alone3 empID = 301
 		# also needs initial pay election set (otherwise land on election page)
 		# Verify employee can use their permissions
@@ -1180,7 +1205,7 @@ class TestInvitations(unittest.TestCase):
 	# @unittest.skipIf(not main.is_web(), 'Cannot copy/paste invite URL on native')
 	# @unittest.skip("Why link busted (# 156138803")
 	def test_invite(self):
-		"""employees : Invitations: .                         test_invite"""
+		""" test_employees.py:TestInvitations.test_invite """
 		#Invite new employee, ensure invite link expires after use.
 		lobby_page = self.nicol.lobby_page
 		signin_page = self.nicol.signin_page
@@ -1230,6 +1255,7 @@ class TestInvitations(unittest.TestCase):
 		emp_page.menu.sign_out()
 
 		# go to url in invitation email, confirm email
+		invite_pre_screen_page = self.poli.invite_pre_screen_page
 		dob_page = self.poli.dob_page
 		invite_page = self.poli.invite_page
 		why_page = self.poli.why_email_page
@@ -1243,6 +1269,13 @@ class TestInvitations(unittest.TestCase):
 		home_page = self.poli.for_employers
 
 		self.driver.get(urls['email_url'])
+		if not main.is_desktop():
+			self.assertTrue(invite_pre_screen_page.on())
+			if main.is_web():
+				invite_pre_screen_page.click('browser')
+			else:
+				invite_pre_screen_page.click('app')
+
 		self.assertTrue(dob_page.on())
 		dob_page.set_dob(dob)
 		dob_page.set_zip(zip_code)
@@ -1296,6 +1329,13 @@ class TestInvitations(unittest.TestCase):
 
 		#Ensure invite url is expired & user lands on account page
 		self.driver.get(urls['email_url'])
+		if not main.is_desktop():
+			self.assertTrue(invite_pre_screen_page.on())
+			if main.is_web():
+				invite_pre_screen_page.click('browser')
+			else:
+				invite_pre_screen_page.click('app')
+
 		self.assertTrue(dob_page.on())
 		self.assertTrue(dob_page.is_expired())
 		# Sign back in and remove employee
@@ -1332,7 +1372,7 @@ class TestInvitations(unittest.TestCase):
 
 	@unittest.skip("Always times out")
 	def test_reinvite(self):
-		"""employees : Invitations .                       test_reinvite"""
+		""" test_employees.py:TestInvitations.test_reinvite """
 		# assert reinvite functionality works as expected
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page
@@ -1373,73 +1413,74 @@ class TestInvitations(unittest.TestCase):
 			# email "mime@fake.com" and status 'Invited'
 
 
-class TestRemove(unittest.TestCase):
-  def setUp(self):
-		self.driver = browser.start(main.get_env(),main.get_browser())
-		self.nicol = profiles.Profile(self.driver,'nicol')
+# Already test removing employee in test_employees.py:TestInvitations.test_invite
+# class TestRemove(unittest.TestCase):
+#   def setUp(self):
+# 		self.driver = browser.start(main.get_env(),main.get_browser())
+# 		self.nicol = profiles.Profile(self.driver,'nicol')
 
-  def tearDown(self):
-		self.driver.quit()
+#   def tearDown(self):
+# 		self.driver.quit()
 
-  #@unittest.skip("Can click 'Remove' button on self. Bug #149857228")
-  def test_self(self):
-		"""employees : Remove .                                test_self"""
-		# assert cannot remove self
-		credentials = self.nicol.credentials
-		lobby_page = self.nicol.lobby_page
-		emp_page = self.nicol.employee_page
-		self.assertTrue(self.nicol.login(self.driver), messages.login)
-		self.assertTrue(lobby_page.on())
-		lobby_page.menu.click_option('employees')
+#   #@unittest.skip("Can click 'Remove' button on self. Bug #149857228")
+#   def test_self(self):
+# 		""" test_employees.py:TestRemove.test_self """
+# 		# assert cannot remove self
+# 		credentials = self.nicol.credentials
+# 		lobby_page = self.nicol.lobby_page
+# 		emp_page = self.nicol.employee_page
+# 		self.assertTrue(self.nicol.login(self.driver), messages.login)
+# 		self.assertTrue(lobby_page.on())
+# 		lobby_page.menu.click_option('employees')
 
-		self.assertTrue(emp_page.on())
-		full_name = credentials['first_name'] + " " + credentials['last_name']
-		try:
-			emp_page.remove_employee('name',full_name)
-			self.fail("Able to click remove on employer in employees list.")
-		except (NoSuchElementException, WebDriverException):
-			pass
+# 		self.assertTrue(emp_page.on())
+# 		full_name = credentials['first_name'] + " " + credentials['last_name']
+# 		try:
+# 			emp_page.remove_employee('name',full_name)
+# 			self.fail("Able to click remove on employer in employees list.")
+# 		except (NoSuchElementException, WebDriverException):
+# 			pass
 
-  @unittest.skipIf(main.get_priority() < 2, "Priority = 2")
-  def test_success(self):
-		"""employees : Remove .                            test_success"""
-		# TODO test that terminate and remove both work
-		lobby_page = self.nicol.lobby_page
-		emp_page = self.nicol.employee_page
-		add_page = self.nicol.employee_add_page
-		self.assertTrue(self.nicol.login(self.driver), messages.login)
-		self.assertTrue(lobby_page.on())
-		if lobby_page.menu.get_current_business() != 'Multiverse':
-			lobby_page.menu.select_business('Multiverse')
-			self.assertTrue(lobby_page.on())
-		lobby_page.menu.click_option('employees')
+#   @unittest.skipIf(main.get_priority() < 2, "Priority = 2")
+#   def test_success(self):
+# 		""" test_employees.py:TestRemove.test_success """
+# 		# TODO test that terminate and remove both work
+# 		lobby_page = self.nicol.lobby_page
+# 		emp_page = self.nicol.employee_page
+# 		add_page = self.nicol.employee_add_page
+# 		self.assertTrue(self.nicol.login(self.driver), messages.login)
+# 		self.assertTrue(lobby_page.on())
+# 		if lobby_page.menu.get_current_business() != 'Multiverse':
+# 			lobby_page.menu.select_business('Multiverse')
+# 			self.assertTrue(lobby_page.on())
+# 		lobby_page.menu.click_option('employees')
 
-		# new invites don't show up in employee table.
-		# too lazy to go through entire invite process.
-		# just remove random Poli Wag from Multiverse
-		self.assertTrue(emp_page.on())
-		emp_page.remove_employee('name', 'Poli Wag')
-		self.assertTrue(emp_page.on())
+# 		# new invites don't show up in employee table.
+# 		# too lazy to go through entire invite process.
+# 		# just remove random Poli Wag from Multiverse
+# 		self.assertTrue(emp_page.on())
+# 		emp_page.remove_employee('name', 'Poli Wag')
+# 		self.assertTrue(emp_page.on())
 
-		# self.assertTrue(emp_page.on())
-		# email = 'svol@example.com'
-		# emp_page.click_plus()
-		# emp_page.click_add_employee()
-		# self.assertTrue(add_page.on())
-		# add_page.set_value('first_name', 'Sarkhan')
-		# add_page.set_value('last_name', 'Vol')
-		# add_page.set_value('email', email)
-		# employee_id = ''.join(str(random.randint(0,9)) for _ in xrange(8))
-		# add_page.set_value('employee_id', employee_id)
-		# add_page.set_value('dob', '04/02/1234')
-		# add_page.set_value('zip_code', '12345')
-		# add_page.click_continue()
-		# time.sleep(1)
+# 		# self.assertTrue(emp_page.on())
+# 		# email = 'svol@example.com'
+# 		# emp_page.click_plus()
+# 		# emp_page.click_add_employee()
+# 		# self.assertTrue(add_page.on())
+# 		# add_page.set_value('first_name', 'Sarkhan')
+# 		# add_page.set_value('last_name', 'Vol')
+# 		# add_page.set_value('email', email)
+# 		# employee_id = ''.join(str(random.randint(0,9)) for _ in xrange(8))
+# 		# add_page.set_value('employee_id', employee_id)
+# 		# add_page.set_value('dob', '04/02/1234')
+# 		# add_page.set_value('zip_code', '12345')
+# 		# add_page.click_continue()
+# 		# time.sleep(1)
 
-		# self.assertTrue(emp_page.on())
-		# emp_page.click_toast()
-		# self.assertIsNotNone(emp_page.get_employee('id',employee_id), False)
-		# emp_page.remove_employee('id',employee_id)
-		# self.assertIsNone(emp_page.get_employee('id',employee_id, False))
+# 		# self.assertTrue(emp_page.on())
+# 		# emp_page.click_toast()
+# 		# self.assertIsNotNone(emp_page.get_employee('id',employee_id), False)
+# 		# emp_page.remove_employee('id',employee_id)
+# 		# self.assertIsNone(emp_page.get_employee('id',employee_id, False))
 
 

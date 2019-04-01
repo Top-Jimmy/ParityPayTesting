@@ -40,7 +40,7 @@ class TestDetails(unittest.TestCase):
 
 	@unittest.skipIf(main.is_ios(), "iOS")
 	def test_invalid_inputs(self):
-		"""business : Details .                         test_invalid_inputs"""
+		""" test_business.py:TestDetails.test_invalid_inputs """
 		# assert 'details' page handles invalid input correctly
 		lobby_page = self.nicol.lobby_page
 		add_page = self.nicol.add_business_page
@@ -99,7 +99,7 @@ class TestDetails(unittest.TestCase):
 				tag, error))
 
 	def test_required_fields(self):
-		"""business : Details .                        test_required fields"""
+		""" test_business.py:TestDetails.test_required_fields """
 		# assert 'Details' page inputs are required as expected
 		# start and end test w/ Nintendo as current business
 		lobby_page = self.boss.lobby_page
@@ -216,7 +216,7 @@ class TestPrefilled(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_find_success(self):
-		"""business : Prefilled .                       test_find_success"""
+		""" test_business.py:TestPrefilled.test_find_success """
 		# assert find business works
 		credentials = self.nicol.credentials
 		lobby_page = self.nicol.lobby_page
@@ -247,15 +247,16 @@ class TestPrefilled(unittest.TestCase):
 		self.assertEqual(get('line2'), '')
 		self.assertEqual(get('city'), 'Redmond')
 		self.assertEqual(get('postal_code'), '98052')
-		self.assertEqual(get('phone'), '(425) 882-2040')
+		self.assertEqual(get('phone'), '(800) 255-3700')
 		# url gets trimmed. no longer has anything after .com
 
 		self.assertEqual(get('website'), 'http://nintendo.com')
 		self.assertEqual(get('state'), 'Washington')
 
-	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
+	# @unittest.skipIf(main.get_priority() < 2, "Priority = 2")
+	@unittest.skip("Busted")
 	def test_handle_address(self):
-		""" business : Prefilled .                  test_handle_address"""
+		""" test_business.py:TestPrefilled.test_handle_address """
 		# assert 'Add Business' handles selecting an address as expected
 		lobby_page = self.nicol.lobby_page
 		add_page = self.nicol.add_business_page
@@ -279,7 +280,7 @@ class TestPrefilled(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 3, "Priority")
 	def test_invalid_inputs(self):
-		"""business : Prefilled .                   test_invalid_inputs"""
+		""" test_business.py:TestPrefilled.test_invalid_inputs """
 		# assert inputs on 'Prefilled' page handle invalid input as expected
 		lobby_page = self.nicol.lobby_page
 		add_page = self.nicol.add_business_page
@@ -332,7 +333,7 @@ class TestPrefilled(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_non_us(self):
-		"""business : Prefilled .                           test_non_us """
+		""" test_business.py:TestPrefilled.test_non_us """
 		# assert cannot add non-US business
 		lobby_page = self.nicol.lobby_page
 		add_page = self.nicol.add_business_page
@@ -349,7 +350,7 @@ class TestPrefilled(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 3, "Priority")
 	def test_required_fields(self):
-		"""business : Prefilled .                    test_required fields"""
+		""" test_business.py:TestPrefilled.test_required_fields """
 		# assert fields on 'Prefilled' page are required as expected
 		# Should start and end test w/ ZZ Designs as current business
 		lobby_page = self.faker.lobby_page
@@ -409,7 +410,8 @@ class TestPrefilled(unittest.TestCase):
 		prefilled_page.set('city', 'Seattle')
 		prefilled_page.click_continue()
 		self.assertEqual(2, error_count(tag, error))
-		prefilled_page.set('state', 'Nevada')
+		# prefilled_page.set('state', 'Nevada')
+		prefilled_page.set_state('Nevada')
 		prefilled_page.click_continue()
 		self.assertEqual(2, error_count(tag, error))
 		prefilled_page.set('postal_code', '99876')
@@ -451,7 +453,7 @@ class TestPrefilled(unittest.TestCase):
 		self.assertTrue(lobby_page.on())
 
 	def test_success_skip(self):
-		"""business : Prefilled .                   test_success_skip"""
+		""" test_business.py:TestPrefilled.test_success_skip """
 		# assert adding 'Prefilled' business works as expected
 		# Skip adding yourself as employee
 		lobby_page = self.tester.lobby_page
@@ -526,7 +528,7 @@ class TestPrefilled(unittest.TestCase):
 		self.assertEqual(get('line2'), '')
 		self.assertEqual(get('city'), 'Redmond')
 		self.assertEqual(get('postal_code'), '98052')
-		self.assertEqual(get('phone'), '(425) 882-2040')
+		self.assertEqual(get('phone'), '(800) 255-3700')
 
 		self.assertEqual(get('website'), 'http://nintendo.com')
 		self.assertEqual(get('state'), 'California')
@@ -563,7 +565,7 @@ class TestPrefilled(unittest.TestCase):
 
 	@unittest.skip("Participate dialog moved to post-approval")
 	def test_success_participate(self):
-		"""business : Prefilled .                  test_success_participate"""
+		""" test_business.py:TestPrefilled.test_success_participate """
 		#dependencies: Should have no Nintendo of America business
 		lobby_page = self.fire.lobby_page
 		emp_page = self.fire.employee_page
@@ -697,6 +699,8 @@ class TestPrefilled(unittest.TestCase):
 		lobby_page.menu.select_business(default_business)
 		self.assertTrue(lobby_page.on())
 
+
+# iOS has serious issues with the autosave input elements on business settings page. SKip most of them
 class TestSettings(unittest.TestCase):
 	def setUp(self):
 		self.driver = browser.start(main.get_env(),main.get_browser())
@@ -711,7 +715,7 @@ class TestSettings(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_business_remove(self):
-		"""business : Settings .                        test_business_remove"""
+		""" test_business.py:TestSettings.test_business_remove """
 		# assert owner can remove business
 		# requisites: "Subway" is removed after test
 		lobby_page = self.krabs.lobby_page
@@ -733,6 +737,7 @@ class TestSettings(unittest.TestCase):
 		prefilled_page.set('ein', '234567847')
 		prefilled_page.click_details()
 		prefilled_page.set('business_name', business_name)
+		prefilled_page.set('line1', 'new line1')
 		prefilled_page.toggle_agree()
 		prefilled_page.click_continue()
 
@@ -765,9 +770,9 @@ class TestSettings(unittest.TestCase):
 		lobby_page.menu.select_business(default_business)
 		self.assertTrue(lobby_page.on())
 
-	@unittest.skipIf(main.get_priority() < 3, "Priority")
+	@unittest.skipIf(main.get_priority() < 3, "Priority" or main.is_ios())
 	def test_invalid_inputs(self):
-		"""business : Settings .                      test_invalid_inputs"""
+		""" test_business.py:TestSettings.test_invalid_inputs """
 		# assert 'Business Settings' page handles invalid inputs as expected
 		lobby_page = self.patrick.lobby_page
 		emp_page = self.patrick.employee_page
@@ -863,7 +868,7 @@ class TestSettings(unittest.TestCase):
 
 	@unittest.skipIf(main.is_ios(), "Autosave input + iOS = suicide")
 	def test_persist(self):
-		"""business : Settings .                            test_persist"""
+		""" test_business.py:TestSettings.test_persist """
 		#Change business settings and assert persistence across logins.
 		lobby_page = self.nicol.lobby_page
 		settings_page = self.nicol.business_settings_page
@@ -942,9 +947,9 @@ class TestSettings(unittest.TestCase):
 
 		self.assertTrue(settings_page.saved())
 
-	@unittest.skipIf(main.get_priority() < 3, "Priority")
+	@unittest.skipIf(main.get_priority() < 3, "Priority" or main.is_ios())
 	def test_required_fields(self):
-		"""business : Settings .                      test_required fields"""
+		""" test_business.py:TestSettings.test_required_fields """
 		# assert 'Business Settings' page requires expected fields
 		lobby_page = self.squid.lobby_page
 		emp_page = self.squid.employee_page
@@ -953,17 +958,16 @@ class TestSettings(unittest.TestCase):
 		settings_page = self.squid.business_settings_page
 		eHome = self.squid.eHome_page
 		default_business = 'Salty Spitoon'
+		business_name = "Nintendo of America"
+		search_term = business_name + ' WA'
+		ein = "66787665"
 		self.assertTrue(self.squid.login(self.driver), messages.login)
 
 		self.assertTrue(lobby_page.on())
 		lobby_page.menu.add_a_business()
-
 		self.assertTrue(add_page.on())
-		business_name = "Nintendo of America"
-		search_term = business_name + ' WA'
 		add_page.add(search_term)
 		self.assertTrue(prefilled_page.on())
-		ein = "66787665"
 		prefilled_page.set('ein', ein)
 		prefilled_page.toggle_agree()
 		prefilled_page.click_continue()
@@ -1040,7 +1044,7 @@ class TestSettings(unittest.TestCase):
 	@unittest.skipIf(main.is_ios() or main.get_priority() < 2,
 	 "Autosave input + iOS = suicide")
 	def test_update(self):
-		"""business : Settings .                             test_update"""
+		""" test_business.py:TestSettings.test_update """
 		# assert changes to 'Business Settings' page persist
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page

@@ -34,6 +34,7 @@ class SettingsPage(Page):
     self.form = self.driver.find_element_by_tag_name('form')
 
     self.load_language_selector()
+    # import pdb; pdb.set_trace()
 
     self.picture_selector = self.form.find_elements_by_tag_name('input')[0]
     self.first_name_input = self.form.find_element_by_id('settings_first_name')
@@ -46,7 +47,7 @@ class SettingsPage(Page):
     self.add_phone_button = find_el_by('settings_add_phone')
 
     self.employers = self.load_employers()
-    self.pin = self.load_pin()
+    # self.pin = self.load_pin()
 
     try:
       self.change_password_button = find_el_by('settings_pw_emp')
@@ -76,11 +77,11 @@ class SettingsPage(Page):
     except NoSuchElementException:
       return None
 
-  def load_pin(self):
-    # return 4 digit PIN
-    pin_cont = self.driver.find_element_by_id('callmi_pin')
-    text = pin_cont.text[:-4]
-    return text
+  # def load_pin(self):
+  #   # return 4 digit PIN
+  #   pin_cont = self.driver.find_element_by_id('callmi_pin')
+  #   text = pin_cont.text[:-4]
+  #   return text
 
   def type_firstname(self,firstname):
     self.first_name_input.clear()

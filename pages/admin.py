@@ -200,13 +200,10 @@ class AddAdminPage(Page):
 
 	def click_existing(self):
 		try:
-			# raw_input('about to click invite tab')
 			self.existing_invite_tab.click()
-			# raw_input('clicked invite tab')
 			# Wait for search input
 			WDW(self.driver, 10).until(
 				EC.element_to_be_clickable((By.ID, 'find_existing_employee')))
-			# raw_input('found search')
 			self.load_form_existing()
 		except Exception as e:
 			print e

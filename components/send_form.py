@@ -161,14 +161,14 @@ class SendForm(Component):
 	def move_picker(self, direction):
 		if main.is_desktop():
 			if direction == 'down':
-				self.pickerDown.click()
+				self.nav.click_el(self.pickerDown)
 			else:
-				self.pickerUp.click()
+				self.nav.click_el(self.pickerUp)
 		else:
 			if direction == 'down':
-				self.pickerOptions[self.get_picker_index() + 2].click()
+				self.nav.click_el(self.pickerOptions[self.get_picker_index() + 2])
 			else:
-				self.pickerOptions[self.get_picker_index() - 2].click()
+				self.nav.click_el(self.pickerOptions[self.get_picker_index() - 2])
 
 	def set_bbva_amount(self, mxnAmount):
 		# move up or down until amount is clickable
@@ -180,7 +180,7 @@ class SendForm(Component):
 				direction = self.get_direction(mxnAmount)
 				if direction == 'click':
 					item = self.get_picker_item(mxnAmount)
-					item.click()
+					self.nav.click_el(item)
 				else:
 					self.move_picker(direction)
 				time.sleep(.4)
@@ -221,10 +221,8 @@ class SendForm(Component):
 		# has issues clicking 'invisible' elements on Safari desktop
 		if speed == 'instant':
 			self.click_el(self.radio_instant)
-			# self.radio_instant.click()
 		else: # default (fast)
 			self.click_el(self.radio_fast)
-			# self.radio_fast.click()
 
 	def get_speed_radio(self):
 		"""Which radio button is selected? Instant or Fast (default)?"""
@@ -237,7 +235,7 @@ class SendForm(Component):
 		if self.get_speed_toggle() != speed:
 			if main.is_ios():
 				el = self.toggle.find_element_by_tag_name('input')
-				el.click()
+				self.nav.click_el(el)
 			else:
 				self.move_to_el(self.toggle)
 
@@ -268,7 +266,8 @@ class SendForm(Component):
 			el = self.mxn_amount
 			amount = self.get_mxn()
 
-		el.click()
+		if el:
+			self.nav.click_el(el)
 
 		# Desktop: hit backspace enough times to clear out current amount
 		# Mobile: hit backspace (on custom keyboard) enough times to clear
@@ -300,41 +299,56 @@ class SendForm(Component):
 		if self.type == 'atm':
 			return self.bbvaUSDAmount
 		else:
-			return self.usd_amount.text
+			amount = (self.usd_amount.text).replace(',', '')
+			return amount
 
 	def get_mxn(self):
 		return self.mxn_amount.text
+
+	def has_error(self):
+		try:
+			self.error = self.form.find_element_by_class_name('alert-danger')
+			self.error_button = self.error.find_element_by_tag_name('button')
+			return True
+		except NoSuchElementException:
+			self.error = None
+			self.error_button = None
+		return False
 
 	def has_balance_error(self):
 		"""Return if page has 'You have no money to send.' msg"""
 		# This text is difficult to parse (react crap and weird ascii chars).
 		# Seems to change sometimes. Last updated 11/29
-		try:
-			self.error = (
-				self.form.find_element_by_class_name('alert-danger'))
-			self.error_button = self.error.find_element_by_tag_name('button')
-			error_p = self.error.find_element_by_tag_name('p')
-			if self.nav.get_text(error_p) == 'You have no money to send.':
-				return True
-		except NoSuchElementException:
-			pass
+		if self.has_error():
+			try:
+				error_p = self.error.find_element_by_tag_name('div')
+				if self.nav.get_text(error_p) == 'You have no money to send.':
+					return True
+			except NoSuchElementException:
+				pass
 		return False
 
-	def try_clear_balance_error(self):
-		"""If balance error on page, clear by clicking x"""
-		if self.has_balance_error():
+	def has_upper_limit_error(self):
+		if self.has_error():
+			try:
+				error_p = self.error.find_element_by_tag_name('div')
+				raw_input(self.nav.get_text(error_p))
+				if 'exceed your deposit limit of USD $999 per day' in self.nav.get_text(error_p):
+					return True
+			except NoSuchElementException:
+				pass
+		return False
+
+	def try_clear_error(self):
+		if self.has_error():
 			# error not visible on mobile
 			if not main.is_desktop():
 				self.scroll_to_bottom()
-			self.error_button.click()
-			try:
-				self.error_button.click()
-			except Exception as e:
-				pass
+			self.nav.click_el(self.error_button)
 			time.sleep(.6)
 
 	def click_account(self):
-		self.destination.click()
+		self.nav.click_el(self.destination)
 		time.sleep(1)
 
 	def get_account_info(self):
@@ -375,15 +389,16 @@ class SendForm(Component):
 	def close_custom_keyboard(self):
 		"""If open, close custom keyboard"""
 		try:
-			self.driver.find_element_by_class_name('key_header_bar').click()
+			el = self.driver.find_element_by_id('accountBalanceDiv')
+			self.nav.click_el(el)
 		except NoSuchElementException:
-			pass
+			print('SendForm: Could not find acct balance to close keyboard')
 
 	def click_custom_key(self, character):
 		"""Given valid character, press correct key on custom keyboard"""
 		key_el = self.get_custom_key(character)
 		if key_el is not None:
-			key_el.click()
+			self.nav.click_el(key_el)
 
 	def get_custom_key(self, character):
 		"""return custom keyboard element corresponding to given character"""
@@ -411,15 +426,15 @@ class SendForm(Component):
 		return self.continue_button.is_enabled()
 
 	def click_continue(self):
+		self.continue_button = self.form.find_element_by_id('send_cont_button')
 		try:
 			WDW(self.driver, 10).until(
-				EC.element_to_be_clickable((By.CLASS_NAME, 'primaryButton')))
+				EC.element_to_be_clickable((By.ID, 'send_cont_button')))
 		except TimeoutException:
 			raise TimeoutException("Send page: Continue button not enabled.")
-		self.continue_button.click()
+		self.nav.click_el(self.continue_button)
 		try:
 			WDW(self.driver, 10).until(
 				EC.presence_of_element_located((By.ID, 'send_conf_button')))
 		except TimeoutException:
 			raise TimeoutException("Send Page: Could not find element on next page.")
-		#time.sleep(5) #id = send_conf_button

@@ -1,7 +1,9 @@
+from navigation import NavigationFunctions
 from page import Page
 import main
 from components import menu
 from components import header
+
 import time
 from selenium.common.exceptions import (NoSuchElementException,
 	StaleElementReferenceException)
@@ -15,6 +17,7 @@ class LobbyPage(Page):
 	def load(self):
 		#raw_input('loading lobby page')
 		try:
+			self.nav = NavigationFunctions(self.driver)
 			self.load_body()
 			self.menu = menu.SideMenu(self.driver, True)
 			self.header = header.PrivateHeader(self.driver)
@@ -97,4 +100,4 @@ class LobbyPage(Page):
 		# make sure menu is closed on desktop
 		if not main.is_desktop():
 			self.menu.close()
-		el.click()
+		self.nav.click_el(el)

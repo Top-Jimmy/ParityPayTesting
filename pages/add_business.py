@@ -1,12 +1,14 @@
+from navigation import NavigationFunctions
 from page import Page
 from components import menu
 from components import header
+import main
+
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import (NoSuchElementException,
 	StaleElementReferenceException, ElementNotVisibleException,
 	WebDriverException, TimeoutException)
 import time
-import main
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait as WDW
@@ -21,6 +23,7 @@ class AddBusinessPage(Page):
 			# Make sure on map page
 			WDW(self.driver, 10).until(lambda x: EC.element_to_be_clickable(
 				(By.ID, 'busName')) and self.try_click('busName'))
+			self.nav = NavigationFunctions(self.driver)
 			self.load_body()
 			self.menu = menu.SideMenu(self.driver)
 			self.header = header.PrivateHeader(self.driver)
@@ -47,15 +50,15 @@ class AddBusinessPage(Page):
 
 	def select_location(self, location, option=0):
 		self.type_location(location)
-		if main.is_android():
-				self.try_hide_keyboard()
+		self.try_hide_keyboard()
 
 		unsetOption = True
 		count = 0
 		while count < 5:
 			try:
 				if self.options is not None:
-					self.options[option].click()
+					self.nav.click_el(self.options[option])
+					# self.options[option].click()
 					try:
 						WDW(self.driver, 5).until(EC.element_to_be_clickable(
 							(By.CLASS_NAME, 'sm-continue-button')))
@@ -77,6 +80,8 @@ class AddBusinessPage(Page):
 		self.location_input.send_keys(location)
 		if main.is_ios():
 			self.location_input.click()
+		# Wait a couple seconds. Sometimes options change as you type
+		time.sleep(2)
 		# wait up to 5 seconds for options to show up
 		presence = EC.presence_of_all_elements_located
 		try:

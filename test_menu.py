@@ -28,7 +28,7 @@ class TestAB(unittest.TestCase):
 		self.driver.quit()
 
 	def test_confirmation_dialog(self):
-		"""Menu : AB .                                confirmation_dialog"""
+		""" test_menu.py:TestAB.test_confirmation_dialog """
 		eHome = self.cheeks.eHome_page
 		send_to_bank = self.cheeks.send_to_bank_page
 		recip = 'Lourdes Ortega'
@@ -59,9 +59,9 @@ class TestAB(unittest.TestCase):
 		eHome.menu.set_ab_value('confirmCheck', True)
 
 	# out of date
-	@unittest.skip("No MX bank accounts/No speed toggle")
+	@unittest.skip("No speed toggle")
 	def test_toggle(self):
-		"""Menu : AB .                                             toggle"""
+		""" test_menu.py:TestAB.test_toggle """
 		eHome = self.cheeks.eHome_page
 		recip_page = self.cheeks.recipient_page
 		send_page = self.cheeks.send_page
@@ -164,7 +164,7 @@ class TestDefaultBehavior(unittest.TestCase):
 
 
 	def test_employee_buttons(self):
-		"""Menu : DefaultBehavior .                         employee_buttons"""
+		""" test_menu.py:TestDefaultBehavior.test_employee_buttons """
 		# Stand Alone6 should have no employer permissions
 		eHome = self.alone.eHome_page
 		recip_page = self.alone.recipient_page
@@ -261,7 +261,7 @@ class TestDefaultBehavior(unittest.TestCase):
 				page.menu.sign_out()
 
 	def test_employer_businesses(self):
-		"""Menu : DefaultBehavior .                      employer_businesses"""
+		""" test_menu.py:TestDefaultBehavior.test_employer_businesses """
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page
 		settings_page = self.nicol.business_settings_page
@@ -341,7 +341,7 @@ class TestDefaultBehavior(unittest.TestCase):
 			self.assertTrue(emp_page.menu.hamburger is not None)
 
 	def test_employer_buttons(self):
-		"""Menu : DefaultBehavior .                         employer_buttons"""
+		""" test_menu.py:TestDefaultBehavior.test_employer_buttons """
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page
 		pe_page = self.nicol.pending_elections_page
@@ -446,7 +446,7 @@ class TestRoleSwitching(unittest.TestCase):
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_landing_pages(self):
-		"""Menu : RoleSwitching .                              landing_pages"""
+		""" test_menu.py:TestRoleSwitching.test_landing_pages """
 		# Changing roles should land on expected pages
 		# Employer default: 'employee' page (should eventually get lobby page)
 		# Employee default: 'account' page
@@ -476,7 +476,6 @@ class TestRoleSwitching(unittest.TestCase):
 		self.assertTrue(recip_page.on())
 
 		recip_page.menu.set_role('employer')
-		#self.WDWait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'invitations_card')))
 		self.assertTrue(lobby_page.on())
 
 		if main.is_desktop():
@@ -501,14 +500,13 @@ class TestRoleSwitching(unittest.TestCase):
 			self.assertTrue(recip_page.on())
 			self.assertEqual('skinny', recip_page.menu.get_menu_status())
 			recip_page.menu.set_role('employer')
-			#self.WDWait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'invitations_card')))
 
 			self.assertTrue(lobby_page.on())
 			self.assertEqual('skinny', lobby_page.menu.get_menu_status())
 
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	def test_remembers_role(self):
-		"""Menu : RoleSwitching .                             remembers_role"""
+		""" test_menu.py:TestRoleSwitching.test_remembers_role """
 		# User profile defaults to employer role
 		lobby_page = self.nicol.lobby_page
 		emp_page = self.nicol.employee_page

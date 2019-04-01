@@ -35,6 +35,7 @@ __all__ = [
 	'invite',
 	'invitation_card',
 	'invitations',
+	'invite_pre_screen',
 	'lobby',
 	'participate',
 	'pay_election',

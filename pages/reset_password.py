@@ -81,7 +81,6 @@ class ResetPasswordCodePage(Page):
     self.code_input.send_keys(self.code)
     if main.is_ios():
       self.code_input.click()
-    # WDW(self.driver, 10).until_not(EC.element_to_be_clickable((By.ID, 'code')))
 
     # no continue button on native app
     if main.is_web():
@@ -111,22 +110,27 @@ class ResetPasswordNewPage(Page):
 
   def load(self):
     try:
-      self.load_body()
       self.header = header.PubHeader(self.driver)
-      return True
+      return self.load_body()
     except (NoSuchElementException, StaleElementReferenceException, WebDriverException) as e:
       print(e)
       return False
 
   def load_body(self):
-    self.h1 = self.driver.find_element_by_tag_name('h1')
-    if self.h1.text != 'New Password':
-      raise NoSuchElementException('not on new password page')
+    try:
+      self.h1 = self.driver.find_element_by_tag_name('h1')
+      if self.h1.text != 'New Password':
+        print('Not on new password page yet')
+        return False
+    except NoSuchElementException:
+      print('New password page not loaded yet')
+      return False
     self.form = self.load_form()
     self.password_input = self.form.find_element_by_tag_name('input')
     self.show_password_but = self.form.find_element_by_id('show_password')
     self.password_tips = self.form.find_element_by_class_name('password_tips')
     self.continue_button = self.form.find_element_by_class_name('primaryButton')
+    return True
 
   def load_form(self):
     # Desktop: Sign In Form is only visible while open. Just return last form

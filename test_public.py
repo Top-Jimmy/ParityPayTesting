@@ -8,34 +8,34 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 # Total - 12
-  # TestContactFlow - 2
+	# TestContactFlow - 2
 	# -test_invalid_inputs
 	# -test_required_fields
-  # TestForEmployees - 4
-  #    -test_about_page
-  #    -test_contact_us_page
-  #    -test_for_employees_page
-  #    -test_for_employees_buttons
-  # TestForEmployers - 6
-  #    -test_demo_form
-  #    -test_for_employers_page
-  #    -test_invalid_inputs
-  #    -test_required_fields
-  #    -test_success_existing
-  #		 -test_success_new
+	# TestForEmployees - 4
+	#    -test_about_page
+	#    -test_contact_us_page
+	#    -test_for_employees_page
+	#    -test_for_employees_buttons
+	# TestForEmployers - 6
+	#    -test_demo_form
+	#    -test_for_employers_page
+	#    -test_invalid_inputs
+	#    -test_required_fields
+	#    -test_success_existing
+	#		 -test_success_new
 
 @unittest.skipIf(not main.is_web() or main.get_priority() < 3, 'Priority')
 class TestContactFlow(unittest.TestCase):
-  def setUp(self):
+	def setUp(self):
 		self.driver = browser.start(main.get_env(), main.get_browser())
 		self.nicol = profiles.Profile(self.driver, 'nicol')
 		self.WDWait = WebDriverWait(self.driver, 10)	#Timeout after 10 sec.
 
-  def tearDown(self):
+	def tearDown(self):
 		self.driver.quit()
 
-  def test_invalid_inputs(self):
-		"""public : Contact Flow .                             invalid_inputs"""
+	def test_invalid_inputs(self):
+		""" test_public.py:TestContactFlow.test_invalid_inputs """
 		# assert "Contact Flow" fields correctly handle invalid input
 		credentials = self.nicol.credentials
 		for_employees = self.nicol.for_employees
@@ -50,26 +50,25 @@ class TestContactFlow(unittest.TestCase):
 		self.assertTrue(map_page.on())
 		map_page.add('Nintendo of America 98052')
 
-		raw_input('?')
 		self.assertTrue(form_page.on())
 		form_page.set_name('Test Request')
 		invalid_phones = ['1234567890', '801123456']
 		error = (
-		  "\"{phone}\" is not a valid phone number in US."
-		  )
+			"\"{phone}\" is not a valid phone number in US."
+			)
 
 		for phone in invalid_phones:
-		  form_page.set_phone(phone)
-		  form_page.click_continue()
-		  self.WDWait.until(
-		  	EC.text_to_be_present_in_element((By.ID, 'phone_helper'),
-		  		error.format(phone=phone))
-		  )
-		  self.assertEqual(1, form_page.number_of_elements(
+			form_page.set_phone(phone)
+			form_page.click_continue()
+			self.WDWait.until(
+				EC.text_to_be_present_in_element((By.ID, 'phone_helper'),
+					error.format(phone=phone))
+			)
+			self.assertEqual(1, form_page.number_of_elements(
 			'p', error.format(phone=phone)))
 
-  def test_required_fields(self):
-		"""public : Contact Flow .                           required_fields"""
+	def test_required_fields(self):
+		""" test_public.py:TestContactFlow.test_required_fields """
 		# assert "Contact Flow" fields are required as expected
 		credentials = self.nicol.credentials
 		for_employees = self.nicol.for_employees
@@ -98,22 +97,22 @@ class TestContactFlow(unittest.TestCase):
 
 		form_page.click_continue()
 		self.WDWait.until(
-	  	EC.text_to_be_present_in_element((By.ID, 'name_helper'), error))
+			EC.text_to_be_present_in_element((By.ID, 'name_helper'), error))
 		self.assertEqual(1, form_page.number_of_elements('p', error))
 
 
 @unittest.skipIf(not main.is_web(),"No public About page on native")
 class TestForEmployees(unittest.TestCase):
-  def setUp(self):
+	def setUp(self):
 		self.driver = browser.start(main.get_env(), main.get_browser())
 		self.nicol = profiles.Profile(self.driver, 'nicol')
 		self.WDWait = WebDriverWait(self.driver, 10)
 
-  def tearDown(self):
+	def tearDown(self):
 		self.driver.quit()
 
-  def test_about_page(self):
-		"""public : ForEmployees .                                about_page"""
+	def test_about_page(self):
+		""" test_public.py:TestForEmployees.test_about_page """
 		# assert about page links and forms work as expected
 		for_employers = self.nicol.for_employers
 		for_employees = self.nicol.for_employees
@@ -147,16 +146,16 @@ class TestForEmployees(unittest.TestCase):
 		about_page.enter_invite_employer_email('')
 		error_msg = 'Your email address is required to continue'
 		self.WDWait.until(
-	  	EC.text_to_be_present_in_element((By.CLASS_NAME, 'error_textbox'),
-	  	error_msg)
-	  )
+			EC.text_to_be_present_in_element((By.CLASS_NAME, 'error_textbox'),
+			error_msg)
+		)
 		num_errors = about_page.number_of_elements
 		self.assertEqual(1,num_errors('span', error_msg))
 		about_page.enter_invite_employer_email('bogus@example.com')
 		self.assertTrue(map_page.on())
 
-  def test_contact_us_page(self):
-		"""public : ForEmployees .                         contact_us_page"""
+	def test_contact_us_page(self):
+		""" test_public.py:TestForEmployees.test_contact_us_page """
 		# assert Contact Us page links and forms work as expected
 		for_employers = self.nicol.for_employers
 		contact_page = self.nicol.contact_us_page
@@ -174,19 +173,19 @@ class TestForEmployees(unittest.TestCase):
 		# header employee and employers buttons
 		self.assertTrue(contact_page.on())
 		if main.is_desktop():
-		  contact_page.header.click_for_employers()
-		  self.assertTrue(for_employers.on())
-		  for_employers.footer.click_link('contact us')
+			contact_page.header.click_for_employers()
+			self.assertTrue(for_employers.on())
+			for_employers.footer.click_link('contact us')
 
-		  self.assertTrue(contact_page.on())
-		  contact_page.header.click_for_employers()
+			self.assertTrue(contact_page.on())
+			contact_page.header.click_for_employers()
 		else:
-		  contact_page.header.select_action('employers')
-		  self.assertTrue(for_employers.on())
-		  for_employers.footer.click_link('contact us')
+			contact_page.header.select_action('employers')
+			self.assertTrue(for_employers.on())
+			for_employers.footer.click_link('contact us')
 
-		  self.assertTrue(contact_page.on())
-		  contact_page.header.select_action('employers')
+			self.assertTrue(contact_page.on())
+			contact_page.header.select_action('employers')
 		self.assertTrue(for_employers.on())
 		for_employers.footer.click_link('contact us')
 
@@ -195,16 +194,16 @@ class TestForEmployees(unittest.TestCase):
 		contact_page.enter_invite_employer_email('')
 		error_msg = 'Your email address is required to continue'
 		self.WDWait.until(
-	  	EC.text_to_be_present_in_element((By.CLASS_NAME, 'error_textbox'),
-	  	error_msg)
-	  )
+			EC.text_to_be_present_in_element((By.CLASS_NAME, 'error_textbox'),
+			error_msg)
+		)
 		num_errors = contact_page.number_of_elements
 		self.assertEqual(1, num_errors('span', error_msg))
 		contact_page.enter_invite_employer_email('bogus@example.com')
 		self.assertTrue(map_page.on())
 
-  def test_for_employees_page(self):
-		"""public : ForEmployees .                   test_for_employees_page"""
+	def test_for_employees_page(self):
+		""" test_public.py:TestForEmployees.test_for_employees_page """
 		for_employees = self.nicol.for_employees
 		contact_page = self.nicol.contact_us_page
 		for_employers = self.nicol.for_employers
@@ -225,9 +224,9 @@ class TestForEmployees(unittest.TestCase):
 
 		# for employers link
 		if main.is_desktop():
-		  for_employees.header.click_for_employers()
+			for_employees.header.click_for_employers()
 		else:
-		  self.assertTrue(for_employees.header.select_action('employers'))
+			self.assertTrue(for_employees.header.select_action('employers'))
 
 		self.assertTrue(for_employers.on())
 		for_employers.header.click_for_employees()
@@ -236,28 +235,17 @@ class TestForEmployees(unittest.TestCase):
 		# sign in/forgot pw
 		if main.is_desktop():
 			self.assertFalse(for_employees.header.sign_in_open())
-			# for_employees.header.click_login()
 			for_employees.header.sign_in_submit('', '')
-
-
-			# for_employees.header.set_sign_in_email('asdf')
-			# for_employees.header.set_sign_in_pw('asdf2')
 			for_employees.header.sign_in_submit('asdf', 'asdf2', False)
-
-			# for_employees.header.click_forgot_pw()
-			# for_employees.header.set_forgot_input('7774563334')
-			# for_employees.header.click_forgot_continue()
 			for_employees.header.forgot_password_submit('7774563334')
 			
 		else:
 			self.assertTrue(for_employees.header.select_action("sign in"))
 			self.assertTrue(signin_page.on())
-			signin_page.set_email('asdf')
-			signin_page.set_password('asdf2')
-			signin_page.click_password_reset()
+			signin_page.signInForm.submit('asdf', 'asdf2', False)
+			signin_page.signInForm.forgot_password()
 			self.assertTrue(reset_page.on())
-			reset_page.set_email('7774563334')
-			reset_page.click_continue()
+			reset_page.submit('7774563334')
 
 		self.assertTrue(code_page.on())
 		code_page.header.click_logo()
@@ -320,9 +308,9 @@ class TestForEmployees(unittest.TestCase):
 		for_employees.footer.click_link('linked in')
 		for_employees.go_to_tab()
 
-  @unittest.skipIf(main.get_priority() < 2, "Priority")
-  def test_for_employees_buttons(self):
-		"""public : ForEmployees .                test_for_employees_buttons"""
+	@unittest.skipIf(main.get_priority() < 2, "Priority")
+	def test_for_employees_buttons(self):
+		""" test_public.py:TestForEmployees.test_for_employees_buttons """
 		# test buttons on home page behave as expected
 		for_employers = self.nicol.for_employers
 		for_employees = self.nicol.for_employees
@@ -361,17 +349,17 @@ class TestForEmployees(unittest.TestCase):
 
 @unittest.skipIf(not main.is_web() or main.get_priority() < 3, 'Priority')
 class TestForEmployers(unittest.TestCase):
-  def setUp(self):
+	def setUp(self):
 		self.driver = browser.start(main.get_env(), main.get_browser())
 		self.nicol = profiles.Profile(self.driver, 'nicol')
 		self.poli = profiles.Profile(self.driver)
 		self.WDWait = WebDriverWait(self.driver, 10)
 
-  def tearDown(self):
+	def tearDown(self):
 		self.driver.quit()
 
-  def test_demo_form(self):
-		"""public : For Employers .                                demo_form"""
+	def test_demo_form(self):
+		""" test_public.py:TestForEmployers.test_demo_form """
 		# assert Employers
 		for_employers = self.nicol.for_employers
 
@@ -382,8 +370,8 @@ class TestForEmployers(unittest.TestCase):
 
 		self.assertTrue(for_employers.get_demo_request_email() == email)
 
-  def test_for_employers_page(self):
-		"""public : For Employers .                       for_employers_page"""
+	def test_for_employers_page(self):
+		""" test_public.py:TestForEmployers.test_for_employers_page """
 		credentials = self.nicol.credentials
 		for_employers = self.nicol.for_employers
 		code_page = self.nicol.enroll_code_page
@@ -394,9 +382,9 @@ class TestForEmployers(unittest.TestCase):
 		self.assertTrue(code_page.on())
 
 	# @unittest.skipIf(not main.is_web(),"No home/enroll on native")
-  @unittest.skip("Need regex and error handling on homepage form. Bug #150529199")
-  def test_invalid_inputs(self):
-		"""public : For Employers .                           invalid_inputs"""
+	@unittest.skip("Need regex and error handling on homepage form. Bug #150529199")
+	def test_invalid_inputs(self):
+		""" test_public.py:TestForEmployers.test_invalid_inputs """
 		# assert inputs on "For Employers" page handle bad input as expected
 		for_employers = self.nicol.for_employers
 		code_page = self.nicol.enroll_code_page
@@ -408,19 +396,19 @@ class TestForEmployers(unittest.TestCase):
 		self.assertTrue(for_employers.go())
 		error_count = for_employers.number_of_elements
 		invalid_emails = ['invalid', 'invalid@', 'invalid.com',
-		  'invalid@.com', 'spaced out@example.com']
+			'invalid@.com', 'spaced out@example.com']
 		invalid_phones = ['1234567890', '801123456', '7775551234', '12345678901234']
 		tag = 'p'
 		error = "Valid email"
 		# Failing. See Bug #150529199.
 		for email in invalid_emails:
-		  self.assertFalse(for_employers.enter_employer(email))
-		  self.assertEqual(error_count(tag, error))
+			self.assertFalse(for_employers.enter_employer(email))
+			self.assertEqual(error_count(tag, error))
 		error = "Please enter a valid phone number"
 		for phone in invalid_phones:
-		  self.assertFalse(for_employers.enter_employer(phone))
-		  # WDW until error shows up
-		  self.assertEqual(1, error_count(tag, error))
+			self.assertFalse(for_employers.enter_employer(phone))
+			# WDW until error shows up
+			self.assertEqual(1, error_count(tag, error))
 		self.assertTrue(for_employers.enter_employer('jbooth@example.com'))
 		self.assertTrue(code_page.on())
 		code_page.enter_code()
@@ -429,9 +417,9 @@ class TestForEmployers(unittest.TestCase):
 		error_count = factor2_page.number_of_elements
 		error = "Please enter a valid phone number"
 		for phone in invalid_phones:
-		  factor2_page.enter_contact(phone)
-		  # WDW until error shows up
-		  self.assertTrue(1, error_count(tag, error))
+			factor2_page.enter_contact(phone)
+			# WDW until error shows up
+			self.assertTrue(1, error_count(tag, error))
 		factor2_page.enter_contact('2024979756')
 
 		self.assertTrue(code_page.on())
@@ -442,11 +430,11 @@ class TestForEmployers(unittest.TestCase):
 		error = "Name error"    #Page does not show error text.
 		invalid_names = ['1234567890', '!@#$%^&*'] #Allow spaces in names?
 		for name in invalid_names:
-		  name_page.set_first_name(name)
-		  name_page.set_last_name(name)
-		  name_page.click_continue()
-		  # WDW until error shows up
-		  self.assertEqual(2, error_count(tag, error))
+			name_page.set_first_name(name)
+			name_page.set_last_name(name)
+			name_page.click_continue()
+			# WDW until error shows up
+			self.assertEqual(2, error_count(tag, error))
 		name_page.set_first_name("Jean-Michael")
 		name_page.set_last_name("Jones-Mikelson")
 		name_page.click_continue()
@@ -472,15 +460,15 @@ class TestForEmployers(unittest.TestCase):
 		error_count = factor2_page.number_of_elements
 		error = "Please enter a valid email address."
 		for email in invalid_emails:
-		  factor2_page.enter_contact(email)
-		  # WDW until error shows up
-		  self.assertEqual(1, error_count(tag, error))
+			factor2_page.enter_contact(email)
+			# WDW until error shows up
+			self.assertEqual(1, error_count(tag, error))
 		factor2_page.enter_contact('jbooth@example.com')
 
 		self.assertTrue(code_page.on())
 
-  def test_required_fields(self):
-		"""public : For Employers .                          required_fields"""
+	def test_required_fields(self):
+		""" test_public.py:TestForEmployers.test_required_fields """
 		# assert "For Employers" page inputs are required as expected
 		for_employers = self.nicol.for_employers
 		code_page = self.nicol.enroll_code_page
@@ -494,9 +482,9 @@ class TestForEmployers(unittest.TestCase):
 		for_employers.enter_employer_email('')
 		error = "A valid email address is required to enroll"
 		self.WDWait.until(
-	  	EC.text_to_be_present_in_element((By.CLASS_NAME, 'error_textbox'),
-	  	error)
-	  )
+			EC.text_to_be_present_in_element((By.CLASS_NAME, 'error_textbox'),
+			error)
+		)
 		self.assertEqual(1, for_employers.number_of_elements('span', error))
 		self.assertTrue(for_employers.on())
 		for_employers.enter_employer_email('jbooth@example.com')
@@ -510,9 +498,9 @@ class TestForEmployers(unittest.TestCase):
 		error = 'Required'
 		# Mobile phone input does not have id
 		self.WDWait.until(
-	  	EC.text_to_be_present_in_element((By.ID, 'undefined_helper'),
-	  	error)
-	  )
+			EC.text_to_be_present_in_element((By.ID, 'undefined_helper'),
+			error)
+		)
 		self.assertEqual(1, factor2_page.number_of_elements('p', error))
 		factor2_page.enter_contact('2024979756')
 
@@ -522,9 +510,9 @@ class TestForEmployers(unittest.TestCase):
 		self.assertTrue(name_page.on())
 		name_page.click_continue()
 		self.WDWait.until(
-	  	EC.text_to_be_present_in_element((By.ID, 'undefined_helper'),
-	  	error)
-	  )
+			EC.text_to_be_present_in_element((By.ID, 'undefined_helper'),
+			error)
+		)
 		self.assertEqual(2, name_page.number_of_elements('p', error))
 		name_page.set_first_name("Jeremy")
 		name_page.click_continue()
@@ -544,8 +532,8 @@ class TestForEmployers(unittest.TestCase):
 
 		self.assertTrue(for_employers.on())
 
-  def test_success_existing(self):
-		"""public : For Employers .                         success_existing"""
+	def test_success_existing(self):
+		""" test_public.py:TestForEmployers.test_success_existing """
 		# login through employer enroll form using existing user's credentials
 		credentials = self.nicol.credentials
 		for_employers = self.nicol.for_employers
@@ -575,8 +563,8 @@ class TestForEmployers(unittest.TestCase):
 		lobby_page.menu.sign_out()
 		self.assertTrue(for_employers.on())
 
-  def test_success_new(self):
-		"""public : For Employers .                              success_new"""
+	def test_success_new(self):
+		""" test_public.py:TestForEmployers.test_success_new """
 		# enroll through employer enroll form using new credentials
 		for_employers = self.poli.for_employers
 		code_page = self.poli.enroll_code_page
@@ -674,4 +662,4 @@ class TestForEmployers(unittest.TestCase):
 		self.assertIsNone(settings_page.menu.role_switch)
 		self.assertIsNone(settings_page.menu.eHome)
 		self.assertIsNone(settings_page.menu.recipients)
-  test_success_new.e2e = True
+	test_success_new.e2e = True

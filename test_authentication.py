@@ -145,8 +145,7 @@ class TestForgotPassword(unittest.TestCase):
 	@unittest.skipIf(main.get_priority() < 3, "Priority = 3")
 	def test_required_fields(self):
 		""" test_authentication.py:TestForgotPassword.test_required_fields """
-		# assert inputs on 'Reset Password' page are required as expected
-		# Sometimes creates test-specific sendmi error message. Hits backend wierd?
+		# Sometimes creates test-specific sendmi error message. Hits backend weird?
 		credentials = self.nicol.credentials
 		signin_page = self.nicol.signin_page
 		reset_page = self.nicol.reset_password_page
@@ -154,7 +153,7 @@ class TestForgotPassword(unittest.TestCase):
 		new_page = self.nicol.reset_password_new_page
 		lobby_page = self.nicol.lobby_page
 
-		# go to reset password page
+		# assert inputs on public 'Reset Password' page are required as expected
 		if main.is_web():
 			self.assertTrue(reset_page.go())
 		else:
@@ -162,19 +161,18 @@ class TestForgotPassword(unittest.TestCase):
 			signin_page.click_password_reset()
 			self.assertTrue(reset_page.on())
 
-		self.assertTrue(reset_page.on())
 		reset_page.submit('')
 		tag = 'p'
 		error = "Required"
 		error_count = reset_page.number_of_elements
 		self.assertEqual(1, error_count(tag, error))
-		# reset_page.set_email('notanemail@none.com')
+
 		reset_page.submit('notanemail@none.com', False)
 		# iOS: Sending keys does not remove 'required' error
 		if not main.is_ios():
 			self.assertEqual(0, error_count(tag, error))
-		reset_page.submit(credentials['email'])
 
+		reset_page.submit(credentials['email'])
 		self.assertTrue(code_page.on())
 		code_page.enter_code()
 		self.assertTrue(code_page.on())
@@ -273,9 +271,7 @@ class TestLogin(unittest.TestCase):
 		for_employers.header.select_action('Sign In')
 
 		self.assertTrue(signin_page.on())
-		signin_page.set_email(credentials['email'])
-		signin_page.set_password(credentials['password'])
-		signin_page.click_login()
+		signin_page.submit(credentials['email'], credentials['password'])
 
 		if signin_code_page.on(): # remember user?
 			signin_code_page.enter_code()
@@ -416,9 +412,7 @@ class TestLogin(unittest.TestCase):
 		signin_code_page = self.nicol.signin_code_page
 
 		self.assertTrue(signin_page.on())
-		signin_page.set_email(credentials['email'])
-		signin_page.set_password(credentials['password'])
-		signin_page.click_login()
+		signin_page.submit(credentials['email'], credentials['password'])
 
 		self.assertTrue(signin_code_page.on())
 		signin_code_page.enter_code()

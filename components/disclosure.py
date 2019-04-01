@@ -1,21 +1,24 @@
 from selenium.common.exceptions import (NoSuchElementException,
 	StaleElementReferenceException, WebDriverException)
-from decimal import *
-import main
-import time
-from component import Component
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from decimal import *
+import time
 
-# Stuff that draws on last step in send flows.
+import main
+from component import Component
+from navigation import NavigationFunctions
+
+# Last screen confirming transfer details before actually sending
 
 class Disclosure(Component):
 
 	def __init__(self, driver):
 		self.driver = driver
+		self.nav = NavigationFunctions(self.driver)
 		self.load()
 
 	def load(self):
@@ -43,12 +46,13 @@ class Disclosure(Component):
 		"""Table containing transfer amount, fees, and total"""
 		self.table_rows = self.container.find_elements_by_tag_name('tr')
 		# returns amount only (in USD)
-		self.transfer_amount = (
-			self.table_rows[0].find_elements_by_tag_name('td')[0].text)
+		self.transfer_amount = self.nav.get_text(
+			self.table_rows[0].find_elements_by_tag_name('td')[0])
+		# Transfer fee row contains "+ " and "&nbsp;1.00" (desktop chrome)
 		self.transfer_fee = (
 			self.table_rows[1].find_elements_by_tag_name('td')[0].text[2:])
-		self.transfer_total = (
-			self.table_rows[2].find_elements_by_tag_name('td')[0].text)
+		self.transfer_total = self.nav.get_text(
+			self.table_rows[2].find_elements_by_tag_name('td')[0])
 
 	def try_load_exchange_rate(self):
 		"""Amount in MXN. Only exists when sending to MX"""
@@ -109,13 +113,13 @@ class Disclosure(Component):
 		return self.name
 
 	def get_transfer_amount(self):
-		return self.transfer_amount
+		return self.transfer_amount.replace(',', '')
 
 	def get_transfer_fee(self):
-		return self.transfer_fee
+		return self.transfer_fee.strip()
 
 	def get_transfer_total(self):
-		return self.transfer_total
+		return self.transfer_total.replace(',', '')
 
 	def get_total_to_recipient(self):
 		return self.total_to_recipient.text
@@ -124,4 +128,33 @@ class Disclosure(Component):
 		return len(self.statements)
 
 	def click_continue(self):
-		self.continue_button.click()
+		self.nav.click_el(self.continue_button)
+
+	def has_error(self):
+		try:
+			self.error = self.driver.find_element_by_class_name('alert-danger')
+			self.error_button = self.error.find_element_by_tag_name('button')
+			return True
+		except NoSuchElementException:
+			self.error = None
+			self.error_button = None
+		return False
+
+	def has_upper_limit_error(self):
+		if self.has_error():
+			try:
+				error_p = self.error.find_element_by_tag_name('div')
+				# raw_input(self.nav.get_text(error_p))
+				if 'exceed your deposit limit of USD $999 per day' in self.nav.get_text(error_p):
+					return True
+			except NoSuchElementException:
+				pass
+		return False
+
+	def try_clear_error(self):
+		if self.has_error():
+			# error not visible on mobile
+			if not main.is_desktop():
+				self.scroll_to_bottom()
+			self.nav.click_el(self.error_button)
+			time.sleep(.6)

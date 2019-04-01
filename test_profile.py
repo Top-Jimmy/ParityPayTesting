@@ -22,6 +22,13 @@ from selenium.webdriver.common.by import By
 	# test_employers
 	# test_update_email
 	# test_update_phone
+# TestSendmiPS - 7     Employer pages, add/edit phone & email, edit pw
+	# test_add_email
+	# test_add_phone
+	# test_change_password
+	# test_employers
+	# test_update_email
+	# test_update_phone
 
 class TestElection(unittest.TestCase):
 	def setUp(self):
@@ -36,7 +43,7 @@ class TestElection(unittest.TestCase):
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	# @unittest.skipIf(main.is_android(), "Manually test Android")
 	def test_multiple_elections(self):
-		"""profile : Election .                           multiple elections"""
+		""" test_profile.py:TestElection.test_multiple_elections """
 		# dependencies: sandy cheeks works for Dunkin' Donuts and multiverse
 		eHome = self.cheeks.eHome_page
 		election_page = self.cheeks.pay_election_page
@@ -80,9 +87,9 @@ class TestElection(unittest.TestCase):
 		self.assertTrue(eHome.on('election'))
 		self.assertTrue(eHome.has_election_prompt())
 		self.assertFalse(eHome.has_save_election_button())
-		eHome.clear_election_prompt()
-		self.assertFalse(eHome.has_election_prompt())
-		self.assertTrue(eHome.has_save_election_button())
+		# eHome.clear_election_prompt()
+		# self.assertFalse(eHome.has_election_prompt())
+		# self.assertTrue(eHome.has_save_election_button())
 
 		# checkout history
 		eHome.view_election_history()
@@ -115,17 +122,19 @@ class TestElection(unittest.TestCase):
 
 	# @unittest.skipIf(main.is_android() is True, "Manually test Android")
 	def test_single_election(self):
-		"""profile : Election .                              single election"""
-		#dependencies: Lili is employee of 'Multiverse' w/ emp ID 13313113
-		business = 'Multiverse'
+		""" test_profile.py:TestElection.test_single_election """
 		# process all pending elections for Multiverse
+		# Lili needs to be employee of 'Multiverse' w/ emp ID 13313113
+		business = 'Multiverse'
 		lobby_page = self.nicol.lobby_page
 		pe_page = self.nicol.pending_elections_page
 		self.assertTrue(self.nicol.login(self.driver), messages.login)
 		self.assertTrue(lobby_page.on())
-		if lobby_page.menu.get_current_business() != business:
-			lobby_page.menu.select_business(business)
-			self.assertTrue(lobby_page.on())
+		# Can't close menu on Android. Checking for business leaves menu open
+		if not main.is_android():
+			if lobby_page.menu.get_current_business() != business:
+				lobby_page.menu.select_business(business)
+				self.assertTrue(lobby_page.on())
 		lobby_page.click_link('card', 1)
 		self.assertTrue(pe_page.on())
 		if pe_page.num_pending_elections() > 0:
@@ -158,9 +167,9 @@ class TestElection(unittest.TestCase):
 		self.assertTrue(eHome.on('election'))
 		self.assertTrue(eHome.has_election_prompt())
 		self.assertFalse(eHome.has_save_election_button())
-		eHome.clear_election_prompt()
-		self.assertFalse(eHome.has_election_prompt())
-		self.assertTrue(eHome.has_save_election_button())
+		# eHome.clear_election_prompt()
+		# self.assertFalse(eHome.has_election_prompt())
+		# self.assertTrue(eHome.has_save_election_button())
 
 		# assert change is reflected in lili's election history
 		eHome.view_election_history()
@@ -235,7 +244,7 @@ class TestElection(unittest.TestCase):
 	@unittest.skipIf(main.get_priority() < 2, "Priority = 2")
 	# @unittest.skipIf(main.is_android() is True, "Manually test Android")
 	def test_zero_election(self):
-		"""profile : Election .                              zero   election"""
+		""" test_profile.py:TestElection.test_zero_election """
 		# reset Lili's multiverse election back to 0
 		business = 'Multiverse'
 		eHome = self.lili.eHome_page
@@ -329,7 +338,7 @@ class TestPS(unittest.TestCase):
 		self.driver.quit()
 
 	def test_add_email(self):
-		"""profile : PS .                                          add email"""
+		""" test_profile.py:TestPS.test_add_email """
 		# depenencies: expecting 1 existing email
 		eHome = self.cheeks.eHome_page
 		ps_page = self.cheeks.ps_page
@@ -378,7 +387,7 @@ class TestPS(unittest.TestCase):
 		self.assertEquals(1,num_emails)
 
 	def test_add_phone(self):
-		"""profile : PS .                                          add phone"""
+		""" test_profile.py:TestPS.test_add_phone """
 		# dependencies: Sandy Cheeks with 1 phone#
 		eHome = self.cheeks.eHome_page
 		ps_page = self.cheeks.ps_page
@@ -420,7 +429,7 @@ class TestPS(unittest.TestCase):
 		self.assertEquals(1,len(ps_page.edit_phone_buttons))
 
 	def test_change_language(self):
-		"""profile : PS .                                    CHANGE LANGUAGE"""
+		""" test_profile.py:TestPS.test_change_language """
 		# Must pass, else site will be in Spanish for subsequent tests
 		# Can be expanded to verify persistance across session/logins?
 		eHome = self.cheeks.eHome_page
@@ -437,7 +446,7 @@ class TestPS(unittest.TestCase):
 		self.assertTrue(ps_page.on())
 
 	def test_change_password(self):
-		"""profile : PS .                                    CHANGE PASSWORD"""
+		""" test_profile.py:TestPS.test_change_password """
 		# dependencies: Stand Alone4 w/ pw "asdfasdf"
 		self.alone4 =  profiles.Profile(self.driver,'alone4')
 		eHome = self.alone4.eHome_page
@@ -488,7 +497,7 @@ class TestPS(unittest.TestCase):
 
 	# Should be fine on mobile (no drawer on employer page)
 	def test_employers(self):
-		"""profile : PS .                                          employers"""
+		""" test_profile.py:TestPS.test_employers """
 		eHome = self.alone6.eHome_page
 		ps_page = self.alone6.ps_page
 		emp_page = self.alone6.employers_page
@@ -539,12 +548,8 @@ class TestPS(unittest.TestCase):
 			emp_page.header.click_back()
 			self.assertTrue(ps_page.on())
 
-	def test_participate(self):
-		"""profile : PS .                                        participate"""
-		pass
-
 	def test_update_email(self):
-		"""profile : PS .                                       update email"""
+		""" test_profile.py:TestPS.test_update_email """
 		# dependencies: expecting default email (alone5@example.com)
 		self.alone5 =  profiles.Profile(self.driver,'alone5')
 		eHome = self.alone5.eHome_page
@@ -590,7 +595,7 @@ class TestPS(unittest.TestCase):
 		self.assertEqual(ps_page.edit_email_buttons[0].text, original_email)
 
 	def test_update_phone(self):
-		"""profile : PS .                                       update phone"""
+		""" test_profile.py:TestPS.test_update_phone """
 		# dependencies: sandy cheeks w/ phone# (202) 786-4237
 		eHome = self.cheeks.eHome_page
 		ps_page = self.cheeks.ps_page
@@ -637,4 +642,325 @@ class TestPS(unittest.TestCase):
 		self.assertTrue(ps_page.on())
 		self.assertEqual(1, len(ps_page.edit_phone_buttons))
 		self.assertTrue(ps_page.has_phone(original_phone))
+
+
+
+# Test add/edit/delete UID for sendmi users
+class TestSendmiPS(unittest.TestCase):
+	def setUp(self):
+		self.driver = browser.start(main.get_env(),main.get_browser())
+		self.andrewS = profiles.Profile(self.driver,'andrewSendmi')
+
+	def tearDown(self):
+		self.driver.quit()
+
+	def test_add_email(self):
+		""" test_profile.py:TestSendmiPS.test_add_email """
+		# depenencies: expecting 1 existing email
+		eHome = self.andrewS.eHome_page
+		ps_page = self.andrewS.ps_page
+		add_email_page = self.andrewS.ps_add_email_page
+		confirmation_page = self.andrewS.ps_confirmation_page
+		edit_email_page = self.andrewS.ps_edit_email_page
+		self.assertTrue(self.andrewS.login(self.driver), messages.login)
+
+		raw_input('on eHome?')
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('settings')
+
+		self.assertTrue(ps_page.on())
+		# remove email if it's there from last test
+		new_email = "andrew2@example.com"
+		if ps_page.has_email(new_email):
+				ps_page.edit_email(new_email)
+				self.assertTrue(edit_email_page.on())
+				edit_email_page.remove_email()
+				self.assertTrue(ps_page.on())
+
+		ps_page.add_email()
+
+		self.assertTrue(add_email_page.on())
+		self.assertTrue(add_email_page.continue_button.is_enabled())
+		add_email_page.click_continue()
+		# need some kind of wait here. Can fail if internet is slow at all.
+		self.assertEquals(1, add_email_page.number_of_elements("p", "Required"))
+		add_email_page.set_email(new_email)
+		add_email_page.click_continue() #id = code
+
+		self.assertTrue(confirmation_page.on())
+		#debug here
+		confirmation_page.enter_code()
+
+		self.assertTrue(ps_page.on())
+		num_emails = len(ps_page.edit_email_buttons)
+		self.assertEquals(2, num_emails)
+		ps_page.edit_email(new_email)
+
+		self.assertTrue(edit_email_page.on())
+		edit_email_page.remove_email()
+
+		self.assertTrue(ps_page.on())
+		num_emails = len(ps_page.edit_email_buttons)
+		self.assertEquals(1, num_emails)
+
+	def test_add_phone(self):
+		""" test_profile.py:TestSendmiPS.test_add_phone """
+		# dependencies: Sandy andrewS with 1 phone#
+		eHome = self.andrewS.eHome_page
+		ps_page = self.andrewS.ps_page
+		add_phone_page = self.andrewS.ps_add_phone_page
+		confirmation_page = self.andrewS.ps_confirmation_page
+		edit_phone_page = self.andrewS.ps_edit_phone_page
+		self.assertTrue(self.andrewS.login(self.driver), messages.login)
+
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('settings')
+
+		self.assertTrue(ps_page.on())
+		# remove phone# if there from last test
+		new_phone = "(202) 554-2345"
+		if ps_page.has_phone(new_phone):
+			WDW(self.driver, 10).until(lambda x: ps_page.edit_phone(new_phone))
+			self.assertTrue(edit_phone_page.on())
+			edit_phone_page.remove_phone()
+			self.assertTrue(ps_page.on())
+
+		self.assertEqual(1,len(ps_page.edit_phone_buttons))
+		ps_page.add_phone()
+
+		self.assertTrue(add_phone_page.on())
+		add_phone_page.set_phone(new_phone)
+		add_phone_page.click_continue()
+
+		self.assertTrue(confirmation_page.on())
+		confirmation_page.enter_code()
+
+		self.assertTrue(ps_page.on())
+		self.assertEqual(2,len(ps_page.edit_phone_buttons))
+		WDW(self.driver, 10).until(lambda x: ps_page.edit_phone(new_phone))
+
+		self.assertTrue(edit_phone_page.on())
+		edit_phone_page.remove_phone()
+
+		self.assertTrue(ps_page.on())
+		self.assertEquals(1,len(ps_page.edit_phone_buttons))
+
+	def test_change_language(self):
+		""" test_profile.py:TestSendmiPS.test_change_language """
+		# Must pass, else site will be in Spanish for subsequent tests
+		# Can be expanded to verify persistance across session/logins?
+		eHome = self.andrewS.eHome_page
+		ps_page = self.andrewS.ps_page
+		self.assertTrue(self.andrewS.login(self.driver), messages.login)
+
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('settings')
+
+		self.assertTrue(ps_page.on())
+		ps_page.change_language('Spanish')
+		self.assertTrue(ps_page.on())
+		ps_page.change_language('English')
+		self.assertTrue(ps_page.on())
+
+	def test_change_password(self):
+		""" test_profile.py:TestSendmiPS.test_change_password """
+		# dependencies: Stand Alone4 w/ pw "asdfasdf"
+		self.alone4 =  profiles.Profile(self.driver,'alone4')
+		eHome = self.alone4.eHome_page
+		ps_page = self.alone4.ps_page
+		change_pw_page = self.alone4.ps_change_pw_page
+		self.assertTrue(self.alone4.login(self.driver), messages.login)
+
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('settings')
+
+		self.assertTrue(ps_page.on())
+		# failing on next line is login failure (wrong pw)
+		ps_page.change_password()
+
+		self.assertTrue(change_pw_page.on())
+		original_pass = "asdfasdf"
+		new_pass = "fibblejack"
+
+		# Check Safari autofill issue
+		self.assertEqual('', change_pw_page.get_current_pw())
+
+		change_pw_page.click_continue()
+		self.assertEquals(
+			2,change_pw_page.number_of_elements("p","Required"))
+		change_pw_page.enter_current_pw(original_pass)
+		change_pw_page.click_continue()
+		self.assertEquals(
+			1,change_pw_page.number_of_elements("p","Required"))
+		change_pw_page.enter_new_pw(new_pass)
+		change_pw_page.click_continue()
+
+		self.assertTrue(ps_page.on())
+		ps_page.menu.sign_out()
+
+		self.assertTrue(self.alone4.login(self.driver, new_pass), messages.login)
+
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('settings')
+
+		self.assertTrue(ps_page.on())
+		ps_page.change_password()
+
+		self.assertTrue(change_pw_page.on())
+		change_pw_page.enter_current_pw(new_pass)
+		change_pw_page.enter_new_pw(original_pass)
+		change_pw_page.click_continue()
+		self.assertTrue(ps_page.on())
+
+	# Should be fine on mobile (no drawer on employer page)
+	def test_employers(self):
+		""" test_profile.py:TestSendmiPS.test_employers """
+		eHome = self.andrewS.eHome_page
+		ps_page = self.andrewS.ps_page
+		emp_page = self.andrewS.employers_page
+		self.assertTrue(self.andrewS.login(self.driver), messages.login)
+
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('settings')
+
+		self.assertTrue(ps_page.on())
+		# elements_containing = ps_page.number_of_elements_containing
+		# num_employers = elements_containing('a','/settings/employer/','href')
+		num_employers = ps_page.num_employers()
+		print(num_employers)
+
+		for i in xrange(num_employers):
+			business_name = ps_page.employers[i].text
+			ps_page.move_to_el(ps_page.employers[i])#.click()
+			self.assertTrue(emp_page.on())
+			self.assertFalse(emp_page.has_horizontal_scroll())
+
+			# Check behavior after refresh (no refresh on native)
+			if main.is_web():
+				self.driver.refresh()
+				self.assertTrue(emp_page.on())
+
+			# Check menu (no menu on mobile)
+			if main.is_desktop():
+				# does not have employer buttons
+				self.assertTrue(emp_page.menu.current_business is None)
+				self.assertTrue(emp_page.menu.add_button is None)
+				self.assertTrue(emp_page.menu.lobby is None)
+				self.assertTrue(emp_page.menu.employees is None)
+				self.assertTrue(emp_page.menu.pending is None)
+				self.assertTrue(emp_page.menu.business_settings is None)
+				self.assertTrue(emp_page.menu.admins is None)
+
+				# has employee buttons
+				self.assertTrue(emp_page.menu.eHome is not None)
+				self.assertTrue(emp_page.menu.recipients is not None)
+
+				# has universal buttons
+				self.assertTrue(emp_page.menu.settings is not None)
+				self.assertTrue(emp_page.menu.contact_us is not None)
+				self.assertTrue(emp_page.menu.about is not None)
+				self.assertTrue(emp_page.menu.terms_and_privacy is not None)
+				self.assertTrue(emp_page.menu.logout is not None)
+
+			emp_page.header.click_back()
+			self.assertTrue(ps_page.on())
+
+	def test_participate(self):
+		""" test_profile.py:TestSendmiPS.test_participate """
+		pass
+
+	def test_update_email(self):
+		""" test_profile.py:TestSendmiPS.test_update_email """
+		# dependencies: expecting default email (andrewS@example.com)
+		eHome = self.andrewS.eHome_page
+		ps_page = self.andrewS.ps_page
+		edit_email_page = self.andrewS.ps_edit_email_page
+		confirm_page = self.andrewS.ps_confirmation_page
+		self.assertTrue(self.andrewS.login(self.driver), messages.login)
+
+		# Sandy should not have permissions to any businesses
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('settings')
+
+		self.assertTrue(ps_page.on())
+		self.assertTrue(1 == len(ps_page.edit_email_buttons))
+		ps_page.edit_email(0)
+
+		self.assertTrue(edit_email_page.on())
+		self.assertFalse(edit_email_page.is_enabled(edit_email_page.continue_button))
+		original_email = "andrew@sendmi.com"
+		updated_email = "andrew2@example.com"
+		edit_email_page.set_email(updated_email)
+		edit_email_page.click_continue()
+
+		self.assertTrue(confirm_page.on())
+		confirm_page.enter_code()
+
+		self.assertTrue(ps_page.on())
+		self.assertEqual(
+			ps_page.edit_email_buttons[0].text, updated_email)
+		ps_page.edit_email(0)
+
+		self.assertTrue(edit_email_page.on())
+		self.assertFalse(edit_email_page.remove_email())
+		edit_email_page.set_email(original_email)
+		edit_email_page.click_continue()
+
+		self.assertTrue(confirm_page.on())
+		confirm_page.enter_code()
+
+		self.assertTrue(ps_page.on())
+		num_emails = len(ps_page.edit_email_buttons)
+		self.assertEqual(1, num_emails)
+		self.assertEqual(ps_page.edit_email_buttons[0].text, original_email)
+
+	def test_update_phone(self):
+		""" test_profile.py:TestSendmiPS.test_update_phone """
+		# dependencies: sandy andrewS w/ phone# (202) 786-4237
+		eHome = self.andrewS.eHome_page
+		ps_page = self.andrewS.ps_page
+		edit_phone_page = self.andrewS.ps_edit_phone_page
+		confirmation_page = self.andrewS.ps_confirmation_page
+		self.assertTrue(self.andrewS.login(self.driver), messages.login)
+
+		self.assertTrue(eHome.on())
+		eHome.menu.click_option('settings')
+
+		self.assertTrue(ps_page.on())
+		self.assertEqual(1,len(ps_page.edit_phone_buttons))
+		WDW(self.driver, 10).until(lambda x: ps_page.edit_phone(0))
+
+		self.assertTrue(edit_phone_page.on())
+		self.assertEqual(None, edit_phone_page.remove_phone_button)
+		new_phone = "(202) 554-2345"
+		original_phone = "(202) 786-4237"
+
+		# Test Safari autofill issue
+		# Input should have existing phone#
+		self.assertEqual(original_phone, edit_phone_page.get_phone())
+
+		edit_phone_page.set_phone(new_phone)
+		self.assertTrue(
+				edit_phone_page.is_enabled(edit_phone_page.continue_button))
+		edit_phone_page.click_continue()
+
+		self.assertTrue(confirmation_page.on())
+		confirmation_page.enter_code()
+
+		self.assertTrue(ps_page.on())
+		num_phones = len(ps_page.edit_phone_buttons)
+		self.assertEqual(1, num_phones)
+		WDW(self.driver, 10).until(lambda x: ps_page.edit_phone(new_phone))
+
+		self.assertTrue(edit_phone_page.on())
+		edit_phone_page.set_phone(original_phone)
+		edit_phone_page.click_continue()
+
+		self.assertTrue(confirmation_page.on())
+		confirmation_page.enter_code()
+
+		self.assertTrue(ps_page.on())
+		self.assertEqual(1, len(ps_page.edit_phone_buttons))
+		self.assertTrue(ps_page.has_phone(original_phone))
+
 

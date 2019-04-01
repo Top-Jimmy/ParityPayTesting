@@ -9,7 +9,7 @@ import main
 
 def get_url(env, device_farm):
   if env == 'desktop':
-    return 'http://127.0.0.1:5051/wd/hub'
+    return 'http://127.0.0.1:5050/wd/hub'
   elif device_farm:
     # AWS Device Farm:
     return 'http://localhost:4723/wd/hub'
@@ -20,6 +20,16 @@ def get_url(env, device_farm):
 
 def get_desired_caps(env, browser, device_farm, chrome_options=False):
   if env == 'android':
+    # device_info = {
+    #   'avd': 'Pixel_2_XL',
+    #   'deviceName': 'Pixel_2_XL',
+    #   'platformVersion': '9.0',
+    # }
+    device_info = {
+      'avd': 'Pixel_XL_8',
+      'deviceName': 'Pixel_XL_8',
+      'platformVersion': '8.0',
+    }
     if device_farm:
       # AWS Device farm: Use empty desiredCapabilities.
       desired_caps = {}
@@ -33,32 +43,32 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
       #   'testobject_appium_version': '1.5.2-patched-chromedriver'
       # }
     elif browser == 'native':
-      app_path = '/Users/andrewtidd/Desktop/ppay10/cordova/platforms/android/build/outputs/apk/android-debug.apk'
+      # appium --chromedriver-executable /Users/andrewtidd/Desktop/drivers/
+      app_path = '/Users/andrewtidd/Workspace/ppay10/cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk'
       desired_caps = {
         'platformName': 'Android',
-        'platformVersion': '8.0',
-        'deviceName': 'Pixel_2_XL',
-        'avd': 'Pixel_2_XL',
         'app': app_path,
         'autoWebview': 'true',
-        'autoGrantPermissions': 'true'
+        'autoGrantPermissions': 'true', 
+        'automationName': 'UiAutomator2',
+        'newCommandTimeout': 20000,
+        # 'chromedriverExecutableDir': '/Users/andrewtidd/Desktop/drivers'
       }
     else: # web
       desired_caps = {
         'platformName': 'Android',
-        'platformVersion': '8.0',
-        'deviceName': 'Pixel_2_XL',
         'browserName': 'Chrome',
-        'avd': 'Pixel_2_XL',
         'autoGrantPermissions': 'true',
         'automationName': 'UiAutomator2',
+        'newCommandTimeout': 20000,
       }
+    desired_caps.update(device_info)
   elif env == 'ios':
     if browser == 'native':
-      app_path = '/Users/andrewtidd/Desktop/ppay10/cordova/platforms/ios/build/emulator/sendmi.app'
+      app_path = '/Users/andrewtidd/Workspace/ppay10/cordova/platforms/ios/build/emulator/sendmi.app'
       desired_caps = {
         'platformName': 'iOS',
-        'platformVersion': '11.4',
+        'platformVersion': '12.0',
         'deviceName': 'iPhone SE',
         'app': app_path,
         'automationName': 'XCUITest',
@@ -67,7 +77,7 @@ def get_desired_caps(env, browser, device_farm, chrome_options=False):
     else: # web
       desired_caps = {
         'platformName': 'iOS',
-        'platformVersion': '11.4',
+        'platformVersion': '12.0',
         'browserName': 'Safari',
         'deviceName': 'iPhone SE',
         'automationName': 'XCUITest'
@@ -127,18 +137,22 @@ def start(env=None, browser=None, cached=False, chrome_options=False):
   if browser.lower() == 'firefox' and cached:
     driver = remote(url, desired_caps, browser_profile=get_profile())
   else:
+    # options = webdriver.ChromeOptions()
+    # options.headless = True
+    # driver = webdriver.Chrome(url, desired_caps, chrome_options=options)
     driver = remote(url, desired_caps)
+
   # elif browser.lower() == 'chrome' and chrome_options:
   #   driver = remote(url, desired_caps, chrome_options=get_chrome_options())
 
 
-  if env == 'desktop':
+  # if env == 'desktop':
+  #   driver.minimize_window()
     # set default window settings
-    driver.set_window_size(1200, 960)
-    if browser.lower() == 'safari':
-      driver.maximize_window()
+    # driver.set_window_size(1200, 960)
+    # if browser.lower() == 'safari':
+    #   driver.maximize_window()
     # driver.set_window_position(0, 0)
-    browser_name = driver.desired_capabilities['browserName']
 
   # # on native, switch to webview
   # instead of setting when starting driver, setting 'autoWebview': 'true'

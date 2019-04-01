@@ -10,13 +10,13 @@ class WhyEmailPage(Page):
 
   def load(self):
     try:
-      # self.menu = menu.SideMenu(self.driver)
       self.header = header.PubHeader(self.driver)
-      if main.config['env'] is 'desktop':
-        button = self.driver.find_elements_by_class_name('primaryButton')[1]
+      # Will be 2 if Sign In form is open on desktop
+      primaryButtons = self.driver.find_elements_by_class_name('primaryButton')
+      if len(primaryButtons) > 1:
+        self.continue_button = primaryButtons[1]
       else:
-        button = self.driver.find_element_by_class_name('primaryButton')
-      self.continue_button = button
+        self.continue_button = primaryButtons[0]
       return True
     except (NoSuchElementException, StaleElementReferenceException) as e:
       return False

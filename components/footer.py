@@ -1,4 +1,3 @@
-from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -36,23 +35,16 @@ class PubFooter(Component):
 			'facebook': find_by('linkDiv')[8],
 			'twitter': find_by('linkDiv')[9],
 			'linked in': find_by('linkDiv')[10],
-			'google+': find_by('linkDiv')[11],
+			# 'google+': find_by('linkDiv')[11],
 			# 'youtube': find_by('linkDiv')[12]
 		}
 
 	def click_link(self,link_text):
 		"""given text of link, move to element and click <a> el"""
 		# print(link_text.lower())
-		link = (
-			self.footer_links[link_text.lower()].find_element_by_tag_name('a'))
-		if main.is_desktop():
-			self.driver.execute_script("arguments[0].scrollIntoView();", link)
-			time.sleep(.4)
-		else:
-			# apparently doesn't work on android 12/17
-			# ActionChains(self.driver).move_to_element(link).perform()
-
-			self.driver.execute_script("arguments[0].scrollIntoView();", link)
+		link = self.footer_links[link_text.lower()].find_element_by_tag_name('a')
+		self.driver.execute_script("arguments[0].scrollIntoView();", link)
+		time.sleep(.4)
 		link.click()
 
 	def click_logo(self):

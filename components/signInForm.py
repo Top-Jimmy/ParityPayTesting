@@ -24,35 +24,31 @@ class SignInForm(Component):
 		self.email_input = self.form.find_element_by_id('signin_form_user')
 		self.password_input = self.form.find_element_by_id('signin_form_pw')
 		self.show_password_button = self.form.find_element_by_id('show_password')
-		self.forgot_password_button = self.form.find_element_by_id('forgot_password')
+		self.forgot_password_button = self.form.find_element_by_id('forgot_password') # (link to reset password)
 		self.continue_button = self.form.find_element_by_id('submit_si_button')
+		# self.nav.print_source()
+		# raw_input('source?')
 		return True
 
 	def submit(self, email, password, submit):
-		print('Form: submitting sign in form')
 		if email or email == '':
 			self.set_email(email)
-		print('Form: set email')
 		if password or password == '':
 			self.set_password(password)
-		print('Form: set password')
 		if submit:
 			self.nav.click_el(self.continue_button)
 
 	def set_email(self, email):
-		raw_input('about to set email')
 		self.nav.set_input(self.email_input, email)
-		raw_input('set email?')
 
 	def set_password(self, password):
-		raw_input('about to set password')
 		self.nav.set_input(self.password_input, password)
-		raw_input('set password?')
 
 	def toggle_password(self):
 		self.nav.click_el(self.show_password_button)
 
 	def forgot_password(self):
+		self.nav.dismiss_keyboard() # Android web needs to close keyboard. Native not tested.
 		self.nav.click_el(self.forgot_password_button)
 
 

@@ -1,15 +1,17 @@
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import (NoSuchElementException,
 	StaleElementReferenceException, TimeoutException, WebDriverException)
+from selenium.webdriver import ActionChains as AC
+from selenium.webdriver.support.wait import WebDriverWait as WDW
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
 from page import Page
 from components import menu
 from components import header
 import time
-from selenium.webdriver import ActionChains as AC
 import main
-from selenium.webdriver.support.wait import WebDriverWait as WDW
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+from navigation import NavigationFunctions
 
 # Different from business_details.py
 # Get to page by adding a business, typing in info, selecting from options, and clicking "Continue".
@@ -20,6 +22,7 @@ class BusinessPrefilledPage(Page):
 
 	def load(self):
 		try:
+			self.nav = NavigationFunctions(self.driver)
 			self.load_body()
 			self.menu = menu.SideMenu(self.driver)
 			self.header = header.PrivateHeader(self.driver)
@@ -104,39 +107,50 @@ class BusinessPrefilledPage(Page):
 			return None
 
 	def get(self, name):
-		el = self.get_el(name)
-		if el is not None:
-			if name == 'state':
-				return el.text
-			return el.get_attribute('value')
-		return None
+		count = 0
+		done = False
+		while not done and count < 5:
+			try:
+				el = self.get_el(name)
+				if el is not None:
+					if name == 'state':
+						return el.text
+					return el.get_attribute('value')
+				return None
+			except StaleElementReferenceException:
+				count += 1
+
+		if count == 5:
+			print('Failed to find value: ' + str(name))
 
 	def set(self, name, value):
 		"""Given name of el, set desired value"""
 		# don't use for setting state. Use type_state() or set_state()
 		el = self.get_el(name)
-		hasNewValue = False
-		if el is not None:
-			AC(self.driver).move_to_element(el).perform()
-			if name == 'state':
-				time.sleep(.4)
-				self.set_state(value)
-				hasNewValue = True
-			else:
-				# Sometimes has issues setting value (component redraws?).
-				# Loop until it actually sets it
-				el.clear()
+		self.nav.set_input(el, value)
+		return True
+		# hasNewValue = False
+		# if el is not None:
+		# 	AC(self.driver).move_to_element(el).perform()
+		# 	if name == 'state':
+		# 		time.sleep(.4)
+		# 		self.set_state(value)
+		# 		hasNewValue = True
+		# 	else:
+		# 		# Sometimes has issues setting value (component redraws?).
+		# 		# Loop until it actually sets it
+		# 		el.clear()
 
-				timeout = time.time() + 5
-				while hasNewValue is False:
-					el.send_keys(value)
-					if self.get(name) == value:
-						hasNewValue = True
-					elif time.time() > timeout:
-						break
-					else:
-						time.sleep(.5)
-		return hasNewValue
+		# 		timeout = time.time() + 5
+		# 		while hasNewValue is False:
+		# 			el.send_keys(value)
+		# 			if self.get(name) == value:
+		# 				hasNewValue = True
+		# 			elif time.time() > timeout:
+		# 				break
+		# 			else:
+		# 				time.sleep(.5)
+		# return hasNewValue
 
 	def set_state(self, state):
 		#raw_input(self.state_dd.text)
@@ -165,14 +179,13 @@ class BusinessPrefilledPage(Page):
 		# agree_checkbox is touchy.
 		# Think you need to reload form after clicking checkbox or submitting form
 		# (only need to reload form after submission if you toggle checkbox afterwards)
+		self.nav.dismiss_keyboard()
 		self.scroll_to_bottom()
 		selected = self.agreed()
-		# if main.get_browser() == 'safari':
-		# 	self.agree_cont.click()
-		# else:
-
-		# Hope this works for all environments
-		self.move_to_el(self.agree_checkbox)
+		if main.get_browser() == 'safari':
+			self.nav.click_el(self.agree_cont)
+		else:
+			self.nav.click_el(self.agree_checkbox)
 		if selected is self.agreed():
 			print('checkbox not altered!')
 		time.sleep(.4)

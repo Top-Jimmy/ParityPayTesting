@@ -327,7 +327,7 @@ class SideMenu():
 			time.sleep(.4)
 
 	def get_current_business(self):
-		# return text of self.current_busines
+		# return text of self.current_business
 		if self.get_role() == 'employer':
 			if self.get_menu_status() == 'skinny':
 				self.open()
@@ -454,7 +454,6 @@ class SideMenu():
 					click_x = native_width - 10
 					# needs bigger value than WEBVIEW (to avoid clicking URL)
 					click_y = 300
-
 
 				if action == 'click': # Either option should work
 					# position = [(click_x, click_y)]

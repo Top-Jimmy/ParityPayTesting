@@ -1,6 +1,7 @@
 from selenium.common.exceptions import (NoSuchElementException,
     StaleElementReferenceException, ElementNotVisibleException,
     InvalidElementStateException, WebDriverException)
+from selenium.webdriver.common.keys import Keys
 import time
 
 import main
@@ -10,8 +11,11 @@ class NavigationFunctions():
     self.driver = driver
 
   def set_input(self, element, value):
+    # iOS Native: Click after changing value (otherwise won't recognize new value)
+
     # Get input/textarea el out of element
     inputEl = self.find_input(element)
+    val = inputEl.get_attribute('value')
 
     # Wait for input to be editable (displayed and enabled)
     if inputEl:
@@ -19,16 +23,18 @@ class NavigationFunctions():
       count = 0
       while not setValue and count < 5:
         try:
-          raw_input('Nav: About to clear input')
-          inputEl.clear()
-          raw_input('Nav: About to send keys')
+          if val:
+            self.clear_input(inputEl)
+
           inputEl.send_keys(value)
-          if main.is_ios():
-            raw_input('Nav: About to click input')
+          if main.is_ios() and not main.is_web():
+            time.sleep(.4)
             self.click_el(inputEl)
           if inputEl.get_attribute('value') == value:
             setValue = True
-            raw_input('input has correct value')
+          elif inputEl.get_attribute('value') == self.to_phone(value):
+             # Check if input formatted value to phone#
+            setValue = True
           else:
             print('SetInput: Expected "' + value + '", loaded "' + str(inputEl.get_attribute('value') + '"'))
         except InvalidElementStateException:
@@ -42,7 +48,8 @@ class NavigationFunctions():
 
   def find_input(self, element):
     inputEl = None
-    tag_name = element.tag_name
+    # Force to lowercase. tag_name is all-caps on Safari (desktop)
+    tag_name = element.tag_name.lower()
     if tag_name == 'input' or tag_name == 'textarea':
       inputEl = element
     else:
@@ -59,6 +66,28 @@ class NavigationFunctions():
           # print('SetInput: no input')
           pass
     return inputEl
+
+  def clear_input(self, inputEl):
+    inputEl.clear()
+    # # iOS native app cannot use .clear() Use backspace key instead
+    # if main.is_ios() and not main.is_web():
+    #   # val = inputEl.get_attribute('value')
+    #   # for i in xrange(len(val)):
+    #   #   print(i)
+    #   #   time.sleep(.2)
+    #   #   inputEl.send_keys(Keys.DELETE)
+
+    #   main.native_context(self.driver)
+    #   self.print_source()
+    #   el = self.driver.find_element_by_id('login')
+    #   el.click()
+    #   # raw_input('in native context.')
+    #   # self.driver.set_value("#login", [" " , "\uE003"])
+    #   # inputEl.clear()
+
+
+    # else:
+    #   inputEl.clear()
 
   def click_el(self, element):
     # Ensure element is clicked
@@ -117,10 +146,17 @@ class NavigationFunctions():
     try:
       element.click()
       return True
-    except WebDriverException:
-      print('WebDriverException: failed to click element')
     except StaleElementReferenceException:
       print('StaleElementReferenceException: failed to click element')
+    except WebDriverException:
+      print('WebDriverException: failed to click element')
+      # raw_input('WTF?')
+      # # Element might be underneath header. Try to scroll up a little bit.
+      # self.move('up',60)
+      # try:
+      #   element.click()
+      # except WebDriverException:
+      #   print('WebDriverException: failed to click element')
     return False
 
   def get_text(self, element):
@@ -142,12 +178,12 @@ class NavigationFunctions():
       return False
     return text
 
-  def try_hide_keyboard(self):
+  def dismiss_keyboard(self):
     """If open, close android keyboard"""
     if main.is_android():
       try:
         self.driver.hide_keyboard()
-        time.sleep(.6)
+        time.sleep(2) # Wait for keyboard to dismiss
       except WebDriverException:
         pass
 
@@ -180,7 +216,38 @@ class NavigationFunctions():
         el.click()
       except WebDriverException:
         self.move('up',60)
-        el.click()
+        self.click_el(el)
       time.sleep(1)
 
+  def move(self, direction, pixels):
+    """move screen given pixels in given direction ('up','down')"""
+    prefix = ''
+    if direction.lower() == 'up':
+      prefix = '-'
+
+    script = 'window.scrollBy(0, {prefix}{pixels});'.format(prefix=prefix, pixels=str(pixels))
+    self.driver.execute_script(script)
+    time.sleep(1)
+
+  def print_source(self):
+    raw_input("source: " + str(self.driver.page_source))
+
+  def to_phone(self, value):
+    # Try and convert value to phone# (some phone# inputs convert value to phone format)
+    # Return false if not a phone#
+    isInt = False
+    try: 
+        int(value)
+        isInt = True
+    except ValueError:
+        pass
+
+    # Accept numbers between 9-10 digits (some tests purposely use invalid numbers)
+    if isInt and len(value) >= 9 and len(value) <= 10:
+      formatted = '(' + value[0:3] + ') ' + value[3:6] + '-' + value[6:]
+      # print(formatted)
+      return formatted
+    else:
+      return False
+      # (123) 456-7890
 

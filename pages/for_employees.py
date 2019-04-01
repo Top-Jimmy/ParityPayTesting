@@ -22,7 +22,9 @@ class ForEmployeesPage(Page):
     try:
       self.load_body()
       self.header = header.PubHeader(self.driver)
+      print('header')
       self.footer = footer.PubFooter(self.driver)
+      print('footer')
       return True
     except (NoSuchElementException, StaleElementReferenceException,
       IndexError) as e:

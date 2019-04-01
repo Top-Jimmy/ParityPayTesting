@@ -1,15 +1,17 @@
 from selenium.common.exceptions import (NoSuchElementException,
 	StaleElementReferenceException, WebDriverException)
 from selenium.webdriver.common.keys import Keys
-from components import menu
-from page import Page
-from components import header
-import time
-import main
 from selenium.webdriver import ActionChains as AC
 from selenium.webdriver.support.wait import WebDriverWait as WDW
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+import time
+import main
+
+from components import menu
+from page import Page
+from components import header
+from navigation import NavigationFunctions
 
 
 class EHomePage(Page):
@@ -18,6 +20,7 @@ class EHomePage(Page):
 
 	def load(self, expectedTab='send'):
 		self.expected_tab = expectedTab
+		self.nav = NavigationFunctions(self.driver)
 		try:
 			self.load_body()
 			self.menu = menu.SideMenu(self.driver, True)
@@ -137,12 +140,14 @@ class EHomePage(Page):
 			self.atm_locator.send_keys(locator)
 		
 	def close_find_atm(self):
-		AC(self.driver).send_keys(Keys.ESCAPE).perform()
-		# if main.is_desktop():
-		# 	AC(self.driver).send_keys(Keys.ESCAPE).perform()		
-		# else:
-		# 	# Doesn't work on Android
-		# 	self.driver.press_keycode(10)
+		if main.is_desktop():
+			AC(self.driver).send_keys(Keys.ESCAPE).perform()
+		else:
+			self.atm_locator.send_keys(Keys.ESCAPE)
+			# press_keycode() only works on Android
+			# main.native_context(self.driver)
+			# self.driver.press_keycode(27)
+			# main.webview_context(self.driver)
 
 ##################### Election Tab #######################
 
@@ -153,8 +158,7 @@ class EHomePage(Page):
 		self.total = self.try_load_total()
 		self.employers = self.driver.find_elements_by_class_name('election_entry')
 		self.save_button = self.try_load_save_button()
-		self.prompt_button = self.try_load_election_prompt()
-		# self.save_button = self.election_form.find_element_by_class_name('primaryButton')
+		self.election_prompt = self.try_load_election_prompt()
 		self.history_button = (
 			self.election_form.find_element_by_class_name('election_history'))
 
@@ -177,7 +181,9 @@ class EHomePage(Page):
 		# Only present after setting/editing an election
 		try:
 			prompt = self.driver.find_element_by_class_name('election_prompt')
-			return prompt.find_element_by_tag_name('button')
+			return prompt
+			# Prompt is now toast-like. No button to clear
+			# return prompt.find_element_by_tag_name('button')
 		except NoSuchElementException:
 			return None
 
@@ -196,21 +202,6 @@ class EHomePage(Page):
 		# Link should not redirect while election form is submitting.
 		# Wait until election prompt shows up before clicking history button
 		# Or, if prompt was cleared, should have save button back
-
-		# Fuck this. Doesn't work half the time. Just wait a second before clicking
-		# timeout = time.time() + 10
-		# has_prompt = False
-		# while has_prompt is False:
-		# 	if expecting == 'prompt' and self.try_load_election_prompt() != None:
-		# 		self.history_button.click()
-		# 		break
-		# 	elif expecting == 'save' and self.try_load_save_button() != None:
-		# 		self.history_button.click()
-		# 		break
-		# 	elif time.time() > timeout:
-		# 		break
-		# 	else:
-		# 		time.sleep(.5)
 
 	def num_employers(self):
 		if self.currentTab != 'election':
@@ -338,16 +329,9 @@ class EHomePage(Page):
 			self.save_button.click()
 		# Not redirecting anywhere right now
 
-	def clear_election_prompt(self):
-		if self.currentTab != 'election':
-			self.setTab('election')
-		if self.prompt_button is not None:
-			self.scroll_to_bottom()
-			self.prompt_button.click()
-			self.on('election')
-
 	def has_election_prompt(self):
-		return self.prompt_button is not None
+		# Will be toast type prompt on desktop. Blue popup on mobile?
+		return self.try_load_election_prompt() is not None
 
 	def has_save_election_button(self):
 		return self.save_button is not None
@@ -357,8 +341,6 @@ class EHomePage(Page):
 	def load_activity_tab(self):
 		self.transactions = self.load_transactions()
 		self.dialog_button = self.try_load_confirmation_dialog()
-		# print('loaded activity tab')
-
 
 	def load_transactions(self):
 		entries = self.driver.find_elements_by_class_name('history-entry')
@@ -388,9 +370,12 @@ class EHomePage(Page):
 		if self.dialog_button != None:
 			self.dialog_button.click()
 
-		# Wait until confirmation dialog disappears
-		WDW(self.driver, 5).until(
-				EC.invisibility_of_element_located((By.ID, 'confirmOkButton')))
+			# Wait until confirmation dialog disappears
+			WDW(self.driver, 5).until(
+					EC.invisibility_of_element_located((By.ID, 'confirmOkButton')))
+			return True
+		print('No transfer confirmation popup')
+		return False
 
 	def click_transaction(self, index=0):
 		if self.currentTab != 'activity':
@@ -443,7 +428,12 @@ class EHomePage(Page):
 
 	def read_transaction_recipient(self, text):
 		# to or from recipient?
+
 		if text[:2] == 'To':
+			# Not displaying destination bank anymore (Oct 2018)
+			# To David Castillo at ZB, N.A. DBA Zions Bank
+			# atIndex = text.index(' at ')
+			# return text[3:atIndex]
 			return text[3:]
 		else: # from
 			return text[5:]

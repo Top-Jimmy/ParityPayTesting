@@ -5,9 +5,9 @@
 # priority: Certain tests will skip depending on priority
 # cancel transactions: Will cancel pending transactions at end of send tests
 config = {
-  'env': 'android',
-  'browser': 'native',
-  'priority_level': 4,
+  'env': 'desktop',
+  'browser': 'chrome',
+  'priority_level': 2,
   'cancel_transaction': True,
   'device_farm': False
 }
@@ -15,9 +15,9 @@ config = {
 # base_url = 'http://localtest.sendmi.com:3000/'
 base_url =  "https://test.sendmi.com/"   # google test server
 if config['browser'] is 'native':
-  version = 'V 1.1.0'
+  version = 'V 1.4.0'
 else:
-  version = 'V 1.1.0'
+  version = 'V 1.4.0'
 
 def get_env():
   return config['env'].lower()
@@ -53,16 +53,16 @@ def is_device_farm():
 
 
 def is_web():
-  return config['browser'] != 'native'
+  return config['browser'].lower() != 'native'
 
 def is_desktop():
-  return config['env'] is 'desktop'
+  return config['env'].lower() == 'desktop'
 
 def is_android():
-  return config['env'] is 'android'
+  return config['env'].lower() == 'android'
 
 def is_ios():
-  return config['env'] is 'ios'
+  return config['env'].lower() == 'ios'
 
 
 

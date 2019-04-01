@@ -15,14 +15,12 @@ from selenium.webdriver.common.by import By
 class AccountPage(Page):
 	url_tail = 'account'
 	dynamic = False
-	#self.WDWait.until(EC.element_to_be_clickable((By.ID, 'cash-bar')))
 
 	def load(self, has_transactions=False):
 		WDW(self.driver, 10).until(lambda x: EC.text_to_be_present_in_element(
 			(By.ID, 'cash-bar'), 'USD') or
 			EC.text_to_be_present_in_element((By.ID, 'cash-bar'), 'money in your transfer savings')
 		)
-		#print('cash-bar text: ' + self.driver.find_element_by_id('cash-bar').text)
 		# Should page have transactions?
 		# If yes, fail loading until transactions load
 		self.expect_transactions = has_transactions
@@ -41,7 +39,6 @@ class AccountPage(Page):
 
 	def load_body(self):
 		self.balance = self.try_load_balance()
-		#print(self.balance.text)
 		self.send_button = self.driver.find_element_by_id('send_money_button')
 		if self.expect_transactions: # fail unless you find transactions
 			self.transactions = self.load_transactions()
@@ -68,11 +65,8 @@ class AccountPage(Page):
 		try:
 			self.balance_cont = self.driver.find_element_by_id('cash-bar')
 			balance_amt = self.balance_cont.find_element_by_tag_name('span')
-			#print('found balance_amt')
-			#print(balance_amt)
 			return balance_amt
 		except NoSuchElementException:
-			#print('failed to find balance.\n' + str(self.balance_cont))
 			return None
 
 	def try_load_confirmation_dialog(self):
@@ -127,9 +121,6 @@ class AccountPage(Page):
 			(By.ID, 'transfer_ok_button')))
 
 	def get_transaction(self, index=0):
-		# Possible to load page before transactions show up
-		# if len(self.transactions) == 0:
-		# 	self.load()
 		if len(self.transactions) == 0:
 			raw_input("No Transactions found")
 

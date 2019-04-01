@@ -1,3 +1,4 @@
+
 from components import menu
 from page import Page
 from components import header
@@ -26,6 +27,7 @@ class SendToBankPage(Page):
       self.header = header.PrivateHeader(self.driver)
       self.stepper = stepper.Stepper(self.driver)
       self.currentStep = self.stepper.get_current_step()
+      # print('loading step: ' + str(self.currentStep[0]))
       if expectedStep and expectedStep != self.currentStep:
         print('Not on expected step. Expected: ' + str(expectedStep) + ', got: ' + str(self.currentStep))
         return False
@@ -61,68 +63,69 @@ class SendToBankPage(Page):
     fail = self.recipUL[0]
 
     self.recipients = {}
-    for i, recip in enumerate(self.recipUL):
-      name = self.read_recip_name(i)
-      bank_accounts = self.recipUL[i].find_elements_by_tag_name('li')
-      del bank_accounts[0] # 1st li is header crap
-      accounts = []
-      for i, account in enumerate(bank_accounts):
-        text = bank_accounts[i].find_elements_by_tag_name('div')[1].text
-        info = self.read_account_info(text)
-        if main.is_ios():
-          info['element'] = bank_accounts[i].find_elements_by_tag_name('div')[0]
-        else:
-          info['element'] = bank_accounts[i]
-        accounts.append(info)
-      self.recipients[name] = accounts
+    try:
+      for i, recip in enumerate(self.recipUL):
+        name = self.read_recip_name(i)
+        bank_accounts = self.recipUL[i].find_elements_by_tag_name('li')
+        del bank_accounts[0] # 1st li is header crap
+        
+        # Bank name, account #, clickable element
+        accounts = []
+        for i, account in enumerate(bank_accounts):
+          divs = bank_accounts[i].find_elements_by_tag_name('div')
+          # Desktop web: divs[1]
+          # Mobile web: divs[0]
+          # Mobile native: ?
+          # for i, div in enumerate(divs):
+          #   print(div.text)
 
-  # Examples...
+          if main.is_web():
+            text = divs[0].text
+          else:
+            text = divs[1].text
+          info = self.read_account_info(text)
 
-  # Iterate through jose's accounts
-  # jose = sendToBank.recipients['Jose Ortega']
-  #   for i, accountNumber in enumerate(account['accountNumber'] for account in jose):
-  #     print str(accountNumber)
-
-  # accountNumber = sendToBank.recipients['Andrew Tidd'][0]['accountNumber']
-
-  # {
-  #   u'Jose Ortega':
-  #     [
-  #       {'accountNumber': u'XXXX1234',
-  #       'bank': u'ZB, N.A. DBA Zions Bank',
-  #       'element': element },
-  #       {'accountNumber': u'XXXX1234',
-  #       'bank': u'ZB, N.A. DBA Zions Bank',
-  #       'element': element }
-  #     ],
-  #   u'Andrew Tidd':
-  #     [{'accountNumber': u'XXX4',
-  #       'bank': u'ZB, N.A. DBA Zions Bank',
-  #       'element': element
-  #     }]
-  # }
+          if main.is_ios():
+            info['element'] = divs[0]
+          else:
+            info['element'] = bank_accounts[i]
+          accounts.append(info)
+        self.recipients[name] = accounts
+    except Exception as ex:
+      template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+      message = template.format(type(ex).__name__, ex.args)
+      raw_input(message)
 
   def read_recip_name(self, index):
+    # Will return '' for user's own accounts
     text = self.recipUL[index].find_elements_by_tag_name('li')[0].text
     # i.e. "Accounts of {name} "
     return text[12:]
 
   def read_account_info(self, text):
     # Split into bank name and account number
-    try:
-      index = text.index('Account ')
-    except ValueError:
-      index = text.index('CLABE ') 
-    return {'bank': text[0:index], 'accountNumber': text[index+8:]}
+    if text:
+      try:
+        index = text.index('Account ')
+      except ValueError:
+        try:
+          index = text.index('CLABE ')
+        except ValueError:
+          raw_input('unable to read account info: ' + str(text))
+      return {'bank': text[0:index], 'accountNumber': text[index+8:]}
+    else:
+      raise Exception("No account info. Passed in wrong div")
 
   def add_account(self):
     self.scroll_to_bottom()
     self.add_account_button.click()
 
   def click_account(self, recipientName, accountIdentifier, add_dob=False):
+    clicked = False
     if isinstance(recipientName, (list,)):
       recipientName = ' '.join(recipientName)
     try:
+      # Use '' to select user's accounts
       recip = self.recipients[recipientName]
       if type(accountIdentifier) is int:
         # send_to_bank.recipients[recip][0]['element'].click()
@@ -132,18 +135,17 @@ class SendToBankPage(Page):
         for i, bankName in enumerate(account['bank'] for account in recip):
           if accountIdentifier in bankName:
             self.move_to_el(recip[i]['element'])
-            # recip[i]['element'].click()
+            clicked=True
             break
       # Reload page. Should be on next step (unless need to add DOB for MX account)
+      if not clicked:
+        print('Failed to find/click account')
       if add_dob:
         return self.on([0, 'Choose Account'])
       else:
         return self.on([1, 'Specify Amount'])
     except (IndexError, KeyError) as e:
       return False
-
-    # jose = sendToBank.recipients['Jose Ortega']
-    # for i, accountNumber in enumerate(account['accountNumber'] for account in jose):
 
   def set_dob(self, dob):
     if self.dob_form:

@@ -141,7 +141,7 @@ class Page:
     self.driver.execute_script(script)
     time.sleep(.4)
 
-  def move(self,direction,pixels):
+  def move(self, direction, pixels):
     """move screen given pixels in given direction ('up','down')"""
     prefix = ''
     if direction.lower() == 'up':
@@ -151,7 +151,7 @@ class Page:
     self.driver.execute_script(script)
     time.sleep(1)
 
-  def ios_scroll(self,direction,pixels):
+  def ios_scroll(self, direction, pixels):
     """Use TouchActions to scroll given amount up or down (ios)
     Note: cannot use TA on android w/out switching to native context"""
     if main.is_ios():

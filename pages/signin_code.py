@@ -4,6 +4,7 @@ from selenium.common.exceptions import (NoSuchElementException,
   StaleElementReferenceException, WebDriverException)
 from selenium.webdriver.support.ui import WebDriverWait as WDW
 from selenium.webdriver.common.keys import Keys
+import re
 import time
 import main
 from components import header
@@ -22,13 +23,18 @@ class SigninCodePage(Page):
       self.header = header.PubHeader(self.driver)
       return True
     except (NoSuchElementException, StaleElementReferenceException) as e:
-      #print('Exception loading signin confirmation')
+      # print('Exception loading signin confirmation')
       return False
 
   def load_body(self):
-    self.h2 = self.driver.find_element_by_tag_name('h2')
-    if (self.h2.text != 'Check your phone!' and
-       self.h2.text != '¡Consultar su teléfono!'):
+    # import pdb; pdb.set_trace()
+    h2 = self.driver.find_element_by_tag_name('h2')
+    if h2:
+      h2 = h2.text
+    # if h2 and (h2 != "Let's make sure it's you!" and h2 != 'Vamos a asegurarnos de que eres tú!'):
+    # Check your phone!
+    if h2 and (h2 != "Check your messages!" and h2 != 'Vamos a asegurarnos de que eres tú!'):  
+      print('ERROR: signin_code has an unexpected header!')
       self.fail = self.driver.find_element_by_id('fail')
 
     self.form = self.driver.find_element_by_tag_name('form')
@@ -65,7 +71,17 @@ class SigninCodePage(Page):
     code = self.toast.text.replace('\n', '')
     if not main.is_desktop():
       self.try_click_toast()
-    return code[32:38]
+    # raw_input('code: ' + str(code))
+
+    # Format of code will differ depending on financial platform
+    # Sendmi code: "Secret codes (click to dismiss):520-146"
+    # Regex: r':[0-9]{3}-[0-9]{3}'
+    # Wingcash code: "Secret codes (click to dismiss):443937 => phone:+12024871238"
+
+    if ' => ' in code: # Wingcash
+      return code[32:38]
+    else:
+      return code[32:39]
 
   def enter_code(self):
     self.scroll_to_bottom()
@@ -75,8 +91,12 @@ class SigninCodePage(Page):
       self.code_input.send_keys('')
     # no continue button on native app
     if main.is_web():
-      WDW(self.driver, 10).until(
-        EC.element_to_be_clickable((By.CLASS_NAME, 'primaryButton')))
+      # WDW fails on Safari. Not sure why.
+      if main.get_browser() == 'safari':
+        time.sleep(1)
+      else:
+        WDW(self.driver, 10).until(
+          EC.element_to_be_clickable((By.CLASS_NAME, 'primaryButton')))
       self.continue_button.click()
 
   # def code_accepted(self):

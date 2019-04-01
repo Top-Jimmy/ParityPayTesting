@@ -22,15 +22,10 @@ class ChangePasswordPage(Page):
 
   def load_body(self):
     self.form = self.driver.find_element_by_tag_name('form')
-    print('form')
     self.current_pw = self.form.find_element_by_id('current_password')
-    print('current')
     self.new_pw = self.form.find_element_by_id('new_password')
-    print('new')
     self.password_tips = self.load_pw_tips()
-    print('password')
     self.continue_button = self.form.find_element_by_id('submit_button')
-    print('done')
 
   def load_pw_tips(self):
     div = self.form.find_element_by_class_name('password-strength-meter')

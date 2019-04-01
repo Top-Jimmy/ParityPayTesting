@@ -2,6 +2,7 @@ from selenium.webdriver.common.keys import Keys
 from page import Page
 from components import menu
 from components import header
+from navigation import NavigationFunctions
 import time
 import main
 from selenium.webdriver import ActionChains as AC
@@ -15,6 +16,7 @@ class BusinessSettingsPage(Page):
 
 	def load(self):
 		try:
+			self.nav = NavigationFunctions(self.driver)
 			self.load_body()
 			self.header = header.PrivateHeader(self.driver)
 			self.menu = menu.SideMenu(self.driver)
@@ -105,7 +107,7 @@ class BusinessSettingsPage(Page):
 
 	def set_state(self, state):
 		if self.state_dd.tag_name != 'input':
-			self.state_dd.click()
+			self.nav.click_el(self.state_dd)
 			time.sleep(1)
 			ActionChains(self.driver).send_keys(state).perform()
 			ActionChains(self.driver).send_keys(Keys.ENTER).perform()
@@ -117,7 +119,7 @@ class BusinessSettingsPage(Page):
 	# select state by typing keys, then selecting state by pressing enter
 	def type_state(self,state):
 		ActionChains(self.driver).move_to_element(self.state_dd).perform()
-		self.state_dd.click()
+		self.nav.click_el(self.state_dd)
 		time.sleep(1.4) # wait before sending keys
 		ActionChains(self.driver).send_keys(state).perform()
 		time.sleep(.4)
@@ -127,16 +129,11 @@ class BusinessSettingsPage(Page):
 		"""Set text of input element with given name"""
 		# don't use for setting state. Use type_state() or set_state()
 		el = self.get_el(name)
-		AC(self.driver).move_to_element(el).perform()
-		time.sleep(.6)
+		# AC(self.driver).move_to_element(el).perform()
+		# time.sleep(.6)
 		# autosave causes issues if you don't use clear_input() instead of clear()
-		self.clear_input(el)
-		# el.clear()
-		time.sleep(.6)
-		el.send_keys(value)
-		if main.is_ios():
-			el.click()
-		time.sleep(.4)
+		# self.clear_input(el)
+		self.nav.set_input(el, value)
 
 	def get_el(self, name):
 		"""Return input element given name. None if invalid name"""
@@ -178,13 +175,16 @@ class BusinessSettingsPage(Page):
 
 	def remove_business(self, code):
 		self.click_remove()
-		self.set_remove_code(code.upper())
+		self.set_remove_code(code)
 		self.click_confirm_remove()
 
 	def click_remove(self):
 		"""Click 'remove' button, then load elements in confirmation popup"""
+		self.nav.dismiss_keyboard() # Hide keyboard first. Otherwise you won't be at bottom of page
 		self.scroll_to_bottom()
-		self.remove_button.click()
+		self.remove_button = (
+			self.driver.find_element_by_class_name('removeButton'))
+		self.nav.click_el(self.remove_button, True)
 		time.sleep(1)
 		self.try_load_remove_popup()
 
@@ -203,7 +203,7 @@ class BusinessSettingsPage(Page):
 			self.confirm_remove_button = None
 
 	def click_cancel_remove(self):
-		self.cancel_remove_button.click()
+		self.nav.click_el(self.cancel_remove_button)
 
 	def click_confirm_remove(self):
 		if main.is_android():
@@ -217,7 +217,6 @@ class BusinessSettingsPage(Page):
 		self.confirm_code_input.send_keys(code)
 		if main.is_ios(): # send_keys doesn't seem to update react component.
 			self.confirm_code_input.send_keys('')
-			# self.confirm_code_input.click()
 
 	def confirm_remove_button_enabled(self):
 		"""Does confirm remove button exist and is it enabled?"""

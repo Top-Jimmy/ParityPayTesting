@@ -287,7 +287,10 @@ class InvitationsPage(Page):
 			checkbox = invitation.find_element_by_tag_name('input')
 			if not checkbox.is_selected():
 				self.move_to_el(checkbox)
-				self.load()
+				return self.load()
+		else:
+			print('failed to find invitation by ' + str(find_by) + ', ' + str(identifier))
+			return False
 
 	def resend_invitations(self):
 		# resend currently selected invitations

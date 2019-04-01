@@ -25,20 +25,16 @@ class PubHeader(Component):
 		self.load()
 
 	def load(self):
-		# self.cont = self.driver.find_element_by_id('sendmi_public_appbar')
-		headers = self.driver.find_elements_by_tag_name('header')
-		self.cont = headers[0]
-		if len(headers) > 1:
-			raw_input('page has more than 1 header element')
+		self.cont = self.load_cont()
+
 		find_by = self.cont.find_element_by_id
 
-		# all environments *ignoring hybrid app (no homepage on hybrid)
+		# Todo: Load Logo, language dd
+
+		# ID nightmare...
 		# self.logo = find_by('public_logo_sm')
 		self.logo = find_by('public_logo')
-		self.language_dd = find_by('locale_dropdown')
-		# Only there when language dropdown is open
-		# self.english = find_by('locale_en')
-		# self.spanish = find_by('locale_es')
+		# self.language_dd = find_by('locale_dropdown')
 
 		self.pre_signed_in = self.load_pre_sign_in()
 		# desktop only
@@ -57,31 +53,21 @@ class PubHeader(Component):
 		self.for_employees = self.load_employees_link()
 
 		# mobile web only
-		self.load_action_menu()
+		self.hamburger = self.try_load_hamburger()
 
-	# def load_sign_in_dd(self):
-	# 	# signin dropdown only on desktop when not signed in
-	# 	# never on signin or signin/code
-	# 	# Contents of dropdown do not exist when dropdown is closed
-	# 	if not self.signed_in():
-	# 		try:
-	# 			self.sign_in_button = (
-	# 				self.cont.find_element_by_id('signin_dropdown'))
-	# 			self.signin_form = self.cont.find_element_by_id('signin_form_id')
-	# 			find_by = self.signin_form.find_element_by_id
-	# 			self.sign_in_email = find_by('signin_form_user')
-	# 			self.sign_in_pw = find_by('signin_form_pw')
-	# 			self.sign_in_forgot_pw = find_by('forgot_password')
-	# 			self.sign_in_continue = find_by('submit_si_button')
-	# 			return
-	# 		except NoSuchElementException:
-	# 			pass
-	# 	self.sign_in_button = None
-	# 	self.signin_form = None
-	# 	self.sign_in_email = None
-	# 	self.sign_in_pw = None
-	# 	self.sign_in_forgot_pw = None
-	# 	self.sign_in_continue = None
+	def load_cont(self):
+		# IDs are a nightmare
+		# look for sendmi_public_appbar or sendmi_appbar
+		try:
+			cont = self.driver.find_element_by_id('sendmi_appbar')
+			return cont
+		except NoSuchElementException:
+			try:
+				cont = self.driver.find_element_by_id('sendmi_public_appbar')
+				return cont
+			except NoSuchElementException:
+				print('Failed to load appbar container')
+				raise NoSuchElementException('Failed to load appbar container')
 
 	def load_pre_sign_in(self):
 		# Desktop: item in header
@@ -95,7 +81,7 @@ class PubHeader(Component):
 		"""Desktop only. Pages: homepage, contact us, about"""
 		# Note: Is same id for option in action menu
 		try:
-			return self.cont.find_element_by_id('public_enroll')
+			return self.cont.find_element_by_id('public_enroll_employers')
 		except NoSuchElementException:
 			return None
 
@@ -107,26 +93,12 @@ class PubHeader(Component):
 		except NoSuchElementException:
 			return None
 
-	def load_action_menu(self):
-		# only on mobile (*no homepage on hybrid)
-		# todo: use unique ID (signed_in conflicts with desktop header link)
-		find_by = self.cont.find_element_by_id
+	def try_load_hamburger(self):
+		# Only on mobile. Menu contents only visible when open
 		try:
-			self.action_menu = find_by('nav_toggle')
-			self.action_employers = self.load_employers_link()
-			self.action_employees = self.load_employees_link()
-			if self.signed_in():
-				self.action_signed_in = find_by('signin_myaccount')
-				self.action_sign_in = None
-			else:
-				self.action_sign_in = find_by('mobile_signin')
-				self.action_signed_in = None
+			return self.driver.find_element_by_id('nav_toggle')
 		except NoSuchElementException:
-			self.action_menu = None
-			self.action_employers = None
-			self.action_employees = None
-			self.action_sign_in = None
-			self.action_signed_in = None
+			return None
 
 	# header functions
 
@@ -154,33 +126,45 @@ class PubHeader(Component):
 
 	def select_action(self, text):
 		# text: 'emp' (employers or employees), 'sign in', or 'signed in'
-		self.nav.click_el(self.action_menu)
-		if self.action_menu != None:
+		if self.hamburger != None:
 			if not self.action_menu_open():
-				self.action_menu.click()
+				self.nav.click_el(self.hamburger)
 				WDW(self.driver, 10).until(lambda x:
-					EC.element_to_be_clickable((By.ID, 'mobile_signin')) or
+					EC.element_to_be_clickable((By.ID, 'public_enroll')) or
 					EC.element_to_be_clickable((By.ID, 'signin_myaccount'))
 				)
 				time.sleep(.4)
 
+			elId = None
 			if text.lower() == 'employers':
-				self.action_employers.click()
+				elId = 'public_enroll_employers'
 			elif text.lower() == 'employees':
-				self.action_employees.click()
-			elif text.lower() == 'sign in' and self.action_sign_in != None:
-				self.action_sign_in.click()
-			elif text.lower() == 'signed in' and self.action_signed_in != None:
-				self.action_signed_in.click()
-			return True
+				elId = 'public_enroll_employees'
+			elif text.lower() == 'sign in':
+				elId = 'public_enroll'
+			elif text.lower() == 'signed in':
+				elId = 'signin_myaccount'
+
+			if elId:
+				try:
+					el = self.driver.find_element_by_id(elId)
+				except NoSuchElementException:
+					print('unable to find element w/ id: ' + str(elId))
+
+			if el:
+				self.nav.click_el(el)
+				return True
 		return False
 
 	def action_menu_open(self):
 		# Does action menu exist (web only) and is it open?
 		find_by = self.driver.find_element_by_class_name
-		if (self.action_menu != None and
-			find_by('navbar-collapse').is_displayed()):
-			return True
+		if (self.hamburger != None):
+			try:
+				el = find_by('MuiDrawer-paperAnchorTop-069')
+				return el.is_displayed()
+			except NoSuchElementException:
+				pass
 		return False
 
 	def sign_in_submit(self, email='', password='', submit=True):
@@ -234,52 +218,6 @@ class PubHeader(Component):
 			except NoSuchElementException:
 				pass
 		return False
-
-	# def click_sign_in(self):
-	# 	self.sign_in_button.click()
-
-	# def set_sign_in_email(self,email):
-	# 	if not self.sign_in_open():
-	# 		self.click_sign_in()
-	# 	self.sign_in_email.clear()
-	# 	self.sign_in_email.send_keys(email)
-
-	# def set_sign_in_pw(self,pw):
-	# 	if not self.sign_in_open():
-	# 		self.click_sign_in()
-	# 	self.sign_in_pw.clear()
-	# 	self.sign_in_pw.send_keys(pw)
-
-	# def click_forgot_pw(self):
-	# 	if not self.sign_in_open():
-	# 		self.click_sign_in()
-	# 	self.sign_in_forgot_pw.click()
-	# 	self.load_forgot_pw()
-
-	# def load_forgot_pw(self):
-	# 	try:
-	# 		self.forgot_form = self.cont.find_element_by_tag_name('form')
-	# 		find_by = self.forgot_form.find_element_by_tag_name
-
-	# 		self.forgot_input = (
-	# 			self.forgot_form.find_element_by_tag_name('input'))
-	# 		self.forgot_continue = (
-	# 			self.forgot_form.find_element_by_id('submit_button'))
-	# 	except NoSuchElementException:
-	# 		self.forgot_input = None
-	# 		self.forgot_continue = None
-
-	# def set_forgot_input(self,text):
-	# 	self.forgot_input.clear()
-	# 	self.forgot_input.send_keys(text)
-
-	# def click_forgot_continue(self):
-	# 	self.forgot_continue.click()
-
-	# def click_login(self):
-	# 	if not self.sign_in_open():
-	# 		self.click_sign_in()
-		self.sign_in_continue.click()
 
 	def signed_in(self):
 		# is user signed in?
